@@ -13,11 +13,11 @@ def print_slow(str): #Prints out text slowly
 def clear(): #Clears all text on screen
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def load_sprite(filename): #Loads sprite/sprite text file
+def load_ASCII(filename): #Loads ASCII/ASCII text file
     with open(filename, "r", encoding="utf-8") as f:
         return f.read()
 
-def print_sprite(filename): #Prints out a sprite/sprite text file
+def print_ASCII(filename): #Prints out a ASCII/ASCII text file
     with open(filename, "r", encoding="utf-8") as f:
         print(f.read())
 
@@ -46,8 +46,8 @@ def player_starters(): #Complete Stat transfer for Player's PYthonMon when getti
     player["py_1"]["move_2"] = pythonmon[(p_id_1)]["move_2"]
     player["py_1"]["move_3"] = pythonmon[(p_id_1)]["move_3"]
     player["py_1"]["move_4"] = pythonmon[(p_id_1)]["move_4"]
-    player["py_1"]["f_sprite"] = pythonmon[(p_id_1)]["f_sprite"]
-    player["py_1"]["b_sprite"] = pythonmon[(p_id_1)]["b_sprite"]
+    player["py_1"]["f_ASCII"] = pythonmon[(p_id_1)]["f_ASCII"]
+    player["py_1"]["b_ASCII"] = pythonmon[(p_id_1)]["b_ASCII"]
     player["py_1"]["hp_bar"] = "████████████████████"
 
     #2nd PYthonMon info transfer
@@ -61,8 +61,8 @@ def player_starters(): #Complete Stat transfer for Player's PYthonMon when getti
     player["py_2"]["move_2"] = pythonmon[(p_id_2)]["move_2"]
     player["py_2"]["move_3"] = pythonmon[(p_id_2)]["move_3"]
     player["py_2"]["move_4"] = pythonmon[(p_id_2)]["move_4"]
-    player["py_2"]["f_sprite"] = pythonmon[(p_id_2)]["f_sprite"]
-    player["py_2"]["b_sprite"] = pythonmon[(p_id_2)]["b_sprite"]
+    player["py_2"]["f_ASCII"] = pythonmon[(p_id_2)]["f_ASCII"]
+    player["py_2"]["b_ASCII"] = pythonmon[(p_id_2)]["b_ASCII"]
     player["py_2"]["hp_bar"] = "████████████████████"
 
     #3rd PYthonMon info transfer
@@ -76,8 +76,8 @@ def player_starters(): #Complete Stat transfer for Player's PYthonMon when getti
     player["py_3"]["move_2"] = pythonmon[(p_id_3)]["move_2"]
     player["py_3"]["move_3"] = pythonmon[(p_id_3)]["move_3"]
     player["py_3"]["move_4"] = pythonmon[(p_id_3)]["move_4"]
-    player["py_3"]["f_sprite"] = pythonmon[(p_id_3)]["f_sprite"]
-    player["py_3"]["b_sprite"] = pythonmon[(p_id_3)]["b_sprite"]
+    player["py_3"]["f_ASCII"] = pythonmon[(p_id_3)]["f_ASCII"]
+    player["py_3"]["b_ASCII"] = pythonmon[(p_id_3)]["b_ASCII"]
     player["py_3"]["hp_bar"] = "████████████████████"
 
 def enemy_team(): #Complete Stat transfer for Enemy's PYthonMon when starting battle
@@ -92,8 +92,8 @@ def enemy_team(): #Complete Stat transfer for Enemy's PYthonMon when starting ba
     enemy["py_1"]["move_2"] = pythonmon[(p_id_1)]["move_2"]
     enemy["py_1"]["move_3"] = pythonmon[(p_id_1)]["move_3"]
     enemy["py_1"]["move_4"] = pythonmon[(p_id_1)]["move_4"]
-    enemy["py_1"]["f_sprite"] = pythonmon[(p_id_1)]["f_sprite"]
-    enemy["py_1"]["b_sprite"] = pythonmon[(p_id_1)]["b_sprite"]
+    enemy["py_1"]["f_ASCII"] = pythonmon[(p_id_1)]["f_ASCII"]
+    enemy["py_1"]["b_ASCII"] = pythonmon[(p_id_1)]["b_ASCII"]
     enemy["py_1"]["hp_bar"] = "████████████████████"
 
     #2nd PYthonMon info transfer
@@ -107,8 +107,8 @@ def enemy_team(): #Complete Stat transfer for Enemy's PYthonMon when starting ba
     enemy["py_2"]["move_2"] = pythonmon[(p_id_2)]["move_2"]
     enemy["py_2"]["move_3"] = pythonmon[(p_id_2)]["move_3"]
     enemy["py_2"]["move_4"] = pythonmon[(p_id_2)]["move_4"]
-    enemy["py_2"]["f_sprite"] = pythonmon[(p_id_2)]["f_sprite"]
-    enemy["py_2"]["b_sprite"] = pythonmon[(p_id_2)]["b_sprite"]
+    enemy["py_2"]["f_ASCII"] = pythonmon[(p_id_2)]["f_ASCII"]
+    enemy["py_2"]["b_ASCII"] = pythonmon[(p_id_2)]["b_ASCII"]
     enemy["py_2"]["hp_bar"] = "████████████████████"
 
     #3rd PYthonMon info transfer
@@ -122,8 +122,8 @@ def enemy_team(): #Complete Stat transfer for Enemy's PYthonMon when starting ba
     enemy["py_3"]["move_2"] = pythonmon[(p_id_3)]["move_2"]
     enemy["py_3"]["move_3"] = pythonmon[(p_id_3)]["move_3"]
     enemy["py_3"]["move_4"] = pythonmon[(p_id_3)]["move_4"]
-    enemy["py_3"]["f_sprite"] = pythonmon[(p_id_3)]["f_sprite"]
-    enemy["py_3"]["b_sprite"] = pythonmon[(p_id_3)]["b_sprite"]
+    enemy["py_3"]["f_ASCII"] = pythonmon[(p_id_3)]["f_ASCII"]
+    enemy["py_3"]["b_ASCII"] = pythonmon[(p_id_3)]["b_ASCII"]
     enemy["py_3"]["hp_bar"] = "████████████████████"
 
 def enemy_py_1_active(): #Makes the Enemy's 1st PYthonMon the Active PYthonMon for the Enemy
@@ -137,8 +137,8 @@ def enemy_py_1_active(): #Makes the Enemy's 1st PYthonMon the Active PYthonMon f
     enemy["py_active"]["move_2"] = enemy["py_1"]["move_2"]
     enemy["py_active"]["move_3"] = enemy["py_1"]["move_3"]
     enemy["py_active"]["move_4"] = enemy["py_1"]["move_4"]
-    enemy["py_active"]["f_sprite"] = enemy["py_1"]["f_sprite"]
-    enemy["py_active"]["b_sprite"] = enemy["py_1"]["b_sprite"]
+    enemy["py_active"]["f_ASCII"] = enemy["py_1"]["f_ASCII"]
+    enemy["py_active"]["b_ASCII"] = enemy["py_1"]["b_ASCII"]
     enemy["py_active"]["hp_bar"] = enemy["py_1"]["hp_bar"]
     
 def battle(): #The entire battle system
@@ -184,10 +184,10 @@ pythonmon = { #All Pythonmon info
             "Sleep Powder",
         "move_4":
             "Poison Powder",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     2: { #All Fire Lizard info
         "name":
@@ -216,10 +216,10 @@ pythonmon = { #All Pythonmon info
             "Leer",
         "move_4":
             "Growl",
-        "f_sprite":
-            load_sprite("Sprites/f_2.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_2.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_2.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_2.txt")
     },
     3: { #All Tutel info
         "name":
@@ -248,10 +248,10 @@ pythonmon = { #All Pythonmon info
             "Withdraw",
         "move_4":
             "Tail Whip",
-        "f_sprite":
-            load_sprite("Sprites/f_3.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_3.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_3.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_3.txt")
     },
     4: { #All Rat info
         "name":
@@ -280,10 +280,10 @@ pythonmon = { #All Pythonmon info
             "Focus Energy",
         "move_4":
             "Tail Whip",
-        "f_sprite":
-            load_sprite("Sprites/f_4.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_4.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_4.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_4.txt")
     },
     5: { #All Lightning Mouse info
         "name":
@@ -312,10 +312,10 @@ pythonmon = { #All Pythonmon info
             "Growl",
         "move_4":
             "Thunder Wave",
-        "f_sprite":
-            load_sprite("Sprites/f_5.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_5.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_5.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_5.txt")
     },
     6: { #All Birb info
         "name":
@@ -344,10 +344,10 @@ pythonmon = { #All Pythonmon info
             "Sand-Attack",
         "move_4":
             "Agility",
-        "f_sprite":
-            load_sprite("Sprites/f_6.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_6.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_6.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_6.txt")
     }
 }
 
@@ -393,10 +393,10 @@ player = { #All Player & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_2": { #All 2nd PYthonMon info (Player)
         "name":
@@ -439,10 +439,10 @@ player = { #All Player & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_3": { #All 3rd PYthonMon info (Player)
         "name":
@@ -485,10 +485,10 @@ player = { #All Player & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_active": { #All PYthonMon (currently in battle) info (Player)
         "name":
@@ -517,10 +517,10 @@ player = { #All Player & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "inv": { #Inventory slot names & quantity
         "slot_1":
@@ -622,10 +622,10 @@ enemy = { #All Enemy & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_2": { #All 2nd PYthonMon info (Enemy)
         "name":
@@ -670,10 +670,10 @@ enemy = { #All Enemy & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_3": { #All 3rd PYthonMon info (Enemy)
         "name":
@@ -718,10 +718,10 @@ enemy = { #All Enemy & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     },
     "py_active": { #All PYthonMon (currently in battle) info (Enemy)
         "name":
@@ -752,10 +752,10 @@ enemy = { #All Enemy & their PYthonMon info
             0,
         "hp_bar":
             "░░░░░░░░░░░░░░░░░░░░",
-        "f_sprite":
-            load_sprite("Sprites/f_1.txt"),
-        "b_sprite":
-            load_sprite("Sprites/b_1.txt")
+        "f_ASCII":
+            load_ASCII("ASCII/f_1.txt"),
+        "b_ASCII":
+            load_ASCII("ASCII/b_1.txt")
     }
 }
 
@@ -1073,32 +1073,32 @@ print_slow("\nThis game is not affiliated with Nintendo or The Pokémon Company 
 time.sleep(3)
 clear()
 
-print_sprite("Sprites/c_1.txt")
+print_ASCII("ASCII/c_1.txt")
 
 time.sleep(2)
 clear()
 
-print_sprite("Sprites/c_2.txt")
+print_ASCII("ASCII/c_2.txt")
     
 time.sleep(2)
 clear()
 
-print_sprite("Sprites/c_3.txt")
+print_ASCII("ASCII/c_3.txt")
     
 time.sleep(2)
 clear()
 
-print_sprite("Sprites/c_4.txt")
+print_ASCII("ASCII/c_4.txt")
     
 time.sleep(2)
 clear()
 
-print_sprite("Sprites/PYthonMon Title (Black).txt")
+print_ASCII("ASCII/PYthonMon Title (Black).txt")
    
 time.sleep(3)
 clear()
 
-print_sprite("Sprites/PYthonMon Title.txt")
+print_ASCII("ASCII/PYthonMon Title.txt")
 input(" ")
 
 while True:
@@ -1121,7 +1121,7 @@ player_starters()
 while True:
     clear()
     p_id_1 = 1
-    print(f"""{player["py_1"]["f_sprite"]}
+    print(f"""{player["py_1"]["f_ASCII"]}
 
 Name: {player["py_1"]["name"]}
 Move 1: {player["py_1"]["move_1"]}
