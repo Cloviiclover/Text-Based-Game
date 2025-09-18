@@ -34,7 +34,6 @@ def hard(): #Hard difficulty
     p_id_3 = random.randint(7,12) #ID randomiser for 3rd PYthonMon
 
 def player_starters(): #Complete Stat transfer for Player's PYthonMon when getting the 3 starters
-    
     #1st PYthonMon info transfer
     player["py_1"]["name"] = pythonmon[(p_id_1)]["name"]
     player["py_1"]["base_hp"] = pythonmon[(p_id_1)]["base_hp"]
@@ -1103,7 +1102,6 @@ input(" ")
 
 while True:
     clear()
-    print(pythonmon[1]["weaknesses"])
     print_slow("""What difficulty will you choose?
 [Normal] [Hard]
 
@@ -1120,7 +1118,7 @@ player_starters()
 
 while True:
     clear()
-    p_id_1 = 1
+    rerolls = 3
     print(f"""{player["py_1"]["f_ASCII"]}
 
 Name: {player["py_1"]["name"]}
@@ -1129,17 +1127,21 @@ Move 2: {player["py_1"]["move_2"]}
 Move 3: {player["py_1"]["move_3"]}
 Move 4: {player["py_1"]["move_4"]}""")
     print_slow("\n\nThis is your starter. Are you ok with it?")
-    choice = input("""\n1: Yes
-2: No (Refresh starters)
+    choice = input(f"""\n1: Yes
+2: No (Refresh starter) ({rerolls} left)
 
 ---> """)
     if choice == "1":
         break
     elif choice == "2":
-        print_slow("\nRandomising!")
-        time.sleep(3)
-        normal()
-        player_starters()
+        if rerolls >= 1:
+            print_slow("\nRandomising!")
+            time.sleep(3)
+            normal()
+            player_starters()
+        else:
+            print_slow("\nYou have no more rerolls. Select again.")
+            time.sleep(3)
     else:
         print_slow("\nInvalid choice. Select again.")
         time.sleep(3)
