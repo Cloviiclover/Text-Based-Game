@@ -1,3 +1,3 @@
 FOR THIS PROJECT TO WORK AT IT'S MAXIMUM I HIGHILY RECOMMEND DOWNLOADING THE "ASCII"
 FILE AND RUNNING THE .py FILE IN YOUR TERMINAL (this is mainly bvecause of the clear
-text function I added).
+text function).
