@@ -8,6 +8,12 @@ def print_slow(str): #Prints out text slowly
         sys.stdout.flush()
         time.sleep(0.05)
 
+def print_slow2(str): #Prints out text slowly
+    for letter in str:
+        sys.stdout.write(letter)
+        sys.stdout.flush()
+        time.sleep(1)
+
 def clear(): #Clears all text on screen
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -19,7 +25,7 @@ def print_ascii(filename): #Prints out a ASCII/ASCII text file
     with open(filename, "r", encoding="utf-8") as f:
         print(f.read())
 
-def print_frame():
+def print_frame(): #Prints Player's battle text file
     ascii_lines = player["other"]["ascii"].split("\n")
     num_lines = len(ascii_lines)
     
@@ -35,7 +41,7 @@ def print_frame():
         ) + "\n")
     sys.stdout.flush()
 
-def print_frame_2():
+def print_frame_2(): #Prints Enemy's battle text file
     ascii_lines_2 = enemies["enemy"]["ascii"].split("\n")
     num_lines_2 = len(ascii_lines_2)
 
@@ -52,7 +58,7 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
     num_lines = len(ascii_lines)
     ascii_lines_2 = enemies[1]["ascii"].split("\n")
     num_lines_2 = len(ascii_lines_2)
-    if heal_hp_player != 0:
+    if heal_hp_player != 0: #HP Recovery animation
         for _ in range(heal_hp_player):
             player["hero"]["hp"] += 1
             if player["hero"]["hp"] > player["hero"]["maxhp"]:
@@ -70,8 +76,8 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
             print_frame_2()
             print_frame()
             time.sleep(0.1)
-
-    if heal_mp_player != 0:
+        
+    if heal_mp_player != 0: #MP Recovery animation
         for _ in range(heal_mp_player):
             player["hero"]["mp"] += 1
             if player["hero"]["mp"] > player["hero"]["maxmp"]:
@@ -90,7 +96,7 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
             print_frame()
             time.sleep(0.2)
     
-    if damage_player != 0:
+    if damage_player != 0: #HP going down animation
         for _ in range(damage_player):
             player["hero"]["hp"] -= 1
             if player["hero"]["hp"] < 0:
@@ -109,7 +115,7 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
             print_frame()
             time.sleep(0.1)
 
-    if mp_deplete_player != 0:
+    if mp_deplete_player != 0: #MP going down animation
         for _ in range(mp_deplete_player):
             player["hero"]["mp"] -= 1
 
@@ -130,7 +136,7 @@ def enemy_animation(heal_hp_enemy, damage_enemy): #Animation for Enemy's HP bar
     num_lines = len(ascii_lines)
     ascii_lines_2 = enemies[1]["ascii"].split("\n")
     num_lines_2 = len(ascii_lines_2)
-    if heal_hp_enemy != 0:
+    if heal_hp_enemy != 0: #HP Recovery animation
         for _ in range(heal_hp_enemy):
             enemies["enemy"]["hp"] += 1
             if enemies["enemy"]["hp"] > enemies["enemy"]["maxhp"]:
@@ -149,7 +155,7 @@ def enemy_animation(heal_hp_enemy, damage_enemy): #Animation for Enemy's HP bar
             print_frame()
             time.sleep(0.1)
     
-    if damage_enemy != 0:
+    if damage_enemy != 0: #HP going down animation
         for _ in range(damage_enemy):
             enemies["enemy"]["hp"] -= 1
             if enemies["enemy"]["hp"] < 0:
@@ -168,16 +174,67 @@ def enemy_animation(heal_hp_enemy, damage_enemy): #Animation for Enemy's HP bar
             print_frame()
             time.sleep(0.1)
 
+def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player): #All Items effects in play
+    if player["other"]["inv"][idx] != "---":
+        if items[player["other"]["inv"][idx]]["type"] == "Health": #Healing HP
+            heal_hp_player = items[player["other"]["inv"][idx]]["recovery"]
+            clear()
+            print_frame_2()
+            print_frame()
+            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+                print_slow(f"\nRecovered All HP.")
+            else:
+                print_slow(f"\nRecovered {heal_hp_player} HP.")
+            heal_hp_player = 0
+            del player["other"]["inv"][idx]
+            player["other"]["inv"].append("---")
+            time.sleep(1)
+        elif items[player["other"]["inv"][idx]]["type"] == "MP": #Healing MP
+            heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
+            clear()
+            print_frame_2()
+            print_frame()
+            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+            if player["hero"]["mp"] == player["hero"]["maxmp"]:
+                print_slow(f"\nRecovered All MP.")
+            else:
+                print_slow(f"\nRecovered {heal_mp_player} MP.")
+            heal_mp_player = 0
+            del player["other"]["inv"][idx]
+            player["other"]["inv"].append("---")
+            time.sleep(1)
+        elif items[player["other"]["inv"][idx]]["type"] == "Health and MP": #Healing both HP and MP
+            heal_hp_player = heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
+            clear()
+            print_frame_2()
+            print_frame()
+            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+                print_slow(f"\nRecovered All HP ")
+            else:
+                print_slow(f"\nRecovered {heal_hp_player} HP ")
+            if player["hero"]["mp"] == player["hero"]["maxmp"]:
+                print_slow(f"and All MP.")
+            else:
+                print_slow(f"and {heal_mp_player} MP.")
+            heal_hp_player = heal_mp_player = 0
+            del player["other"]["inv"][idx]
+            player["other"]["inv"].append("---")
+            time.sleep(1)
+
 def level_stats(player): #All stats going up when levelling up
     print_slow(f"""\n\nYou leveled up!
-HP: {player["hero"]["maxhp"]} --> HP: {player["hero"]["maxhp"]+2}
-MP: {player["hero"]["maxmp"]} --> MP: {player["hero"]["maxmp"]+1}
+HP: {player["hero"]["maxhp"]} --> HP: {player["hero"]["maxhp"]+7}
+MP: {player["hero"]["maxmp"]} --> MP: {player["hero"]["maxmp"]}
 ATK: {player["hero"]["atk"]} --> ATK: {player["hero"]["atk"]+2}
 DEF: {player["hero"]["def"]} --> DEF: {player["hero"]["def"]+1}
 MAGIC: {player["hero"]["magic"]} --> MAGIC: {player["hero"]["magic"]+1}""")
-    player["hero"]["maxhp"] += 2
+    player["hero"]["maxhp"] += 7
     player["hero"]["hp"] = player["hero"]["maxhp"]
-    player["hero"]["maxmp"] += 1
     player["hero"]["mp"] = player["hero"]["maxmp"]
     player["hero"]["atk"] += 2
     player["hero"]["def"] += 1
@@ -236,15 +293,16 @@ def mp_stars(player): #MP stars generation
     else:
         player["other"]["mp_stars"] = "LOCKED"
 
-def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells): #The entire battle system
+def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice): #The entire battle system
     while True:
         while True:
-            #RESETING THESE SO THEY DON'T OVERLAP IN EFFECT
-            damage_player = 0
-            damage_enemy = 0
-            heal_hp_player = 0
-            heal_hp_enemy = 0
-            mp_deplete_player = 0
+            if defend_player == True:
+                defend_player = False
+                player["hero"]["def"] /= 1.5
+                if player["hero"]["def"] % 1 == 0:
+                    player["hero"]["def"] = int(player["hero"]["def"])
+                else:
+                    player["hero"]["def"] = round(player["hero"]["def"])
             clear()
             print_frame_2()
             print_frame()
@@ -272,6 +330,7 @@ def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp
                         damage_enemy = 1
                     enemy_animation(heal_hp_enemy, damage_enemy)
                     print_slow(f"\nDealt {damage_enemy} damage.")
+                    damage_enemy = 0
                     time.sleep(1)
                     break
                 else:
@@ -284,20 +343,28 @@ def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp
                 print(f"""
  ____________________________________
 ¦
-¦ 1: [{player["hero"]["spells"][0]}] Cost: [{spells[player["hero"]["spells"][0]]["cost"]}]
-¦ 2: [{player["hero"]["spells"][1]}] Cost: [{spells[player["hero"]["spells"][1]]["cost"]}]
-¦ 3: [{player["hero"]["spells"][2]}] Cost: [{spells[player["hero"]["spells"][2]]["cost"]}]
-¦ 4: [{player["hero"]["spells"][3]}] Cost: [{spells[player["hero"]["spells"][3]]["cost"]}]
-¦ 5: [{player["hero"]["spells"][4]}] Cost: [{spells[player["hero"]["spells"][4]]["cost"]}]
-¦ 6: [{player["hero"]["spells"][5]}] Cost: [{spells[player["hero"]["spells"][5]]["cost"]}]
-¦ 7: [{player["hero"]["spells"][6]}] Cost: [{spells[player["hero"]["spells"][6]]["cost"]}]
-¦ 8: [{player["hero"]["spells"][7]}] Cost: [{spells[player["hero"]["spells"][7]]["cost"]}]
+¦ 1: [{player["hero"]["spells"][0]}] Cost: [{spells[player["hero"]["spells"][0]]["cost"]} MP]
+¦ 2: [{player["hero"]["spells"][1]}] Cost: [{spells[player["hero"]["spells"][1]]["cost"]} MP]
+¦ 3: [{player["hero"]["spells"][2]}] Cost: [{spells[player["hero"]["spells"][2]]["cost"]} MP]
+¦ 4: [{player["hero"]["spells"][3]}] Cost: [{spells[player["hero"]["spells"][3]]["cost"]} MP]
+¦ 5: [{player["hero"]["spells"][4]}] Cost: [{spells[player["hero"]["spells"][4]]["cost"]} MP]
+¦ 6: [{player["hero"]["spells"][5]}] Cost: [{spells[player["hero"]["spells"][5]]["cost"]} MP]
+¦ 7: [{player["hero"]["spells"][6]}] Cost: [{spells[player["hero"]["spells"][6]]["cost"]} MP]
+¦ 8: [{player["hero"]["spells"][7]}] Cost: [{spells[player["hero"]["spells"][7]]["cost"]} MP]
 ¦____________________________________
 
-What spell do you choose?
+What spell will you use?
 Press enter to go back.""")
-                choice = input("\n--> ")
-                idx = int(choice) - 1
+                choice_magic = input("\n--> ")
+                if choice_magic.strip() == "":
+                    continue
+                try:
+                    idx = int(choice_magic) - 1
+                except ValueError:
+                    print_slow("\nInvalid choice. Please select again.")
+                    time.sleep(1)
+                    clear()
+                    continue
                 if player["hero"]["spells"][idx] != "---":
                     if player["hero"]["mp"] - spells[player["hero"]["spells"][idx]]["cost"] >= 0:
                         if spells[player["hero"]["spells"][idx]]["type"] == "Heal":
@@ -312,14 +379,29 @@ Press enter to go back.""")
                             print_frame()
                             print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
                             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-                            print_slow(f"\nHealed {heal_hp_player} HP.")
+                            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+                                print_slow(f"\nRecovered All HP.")
+                            else:
+                                print_slow(f"\nRecovered {heal_hp_player} HP.")
+                            heal_hp_player = mp_deplete_player = 0
+                            time.sleep(1)
                             break
                         elif spells[player["hero"]["spells"][idx]]["type"] == "Damage":
-                            damage_enemy = max(1, (player["hero"]["magic"] * spells[player["hero"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75))
+                            damage_enemy = (player["hero"]["magic"] * spells[player["hero"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
                             if damage_enemy % 1 == 0:
                                 damage_enemy = int(damage_enemy)
                             else:
                                 damage_enemy = round(damage_enemy)
+                            mp_deplete_player = spells[player["hero"]["spells"][idx]]["cost"]
+                            clear()
+                            print_frame_2()
+                            print_frame()
+                            print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
+                            enemy_animation(heal_hp_enemy, damage_enemy)
+                            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+                            print_slow(f"\nDealt {damage_enemy} damage.")
+                            damage_enemy = mp_deplete_player = 0
+                            time.sleep(1)
                             break
                         elif spells[player["hero"]["spells"][idx]]["type"] == "Half":
                             damage_enemy = enemies["enemy"]["hp"] / 2
@@ -327,6 +409,16 @@ Press enter to go back.""")
                                 damage_enemy = int(damage_enemy)
                             else:
                                 damage_enemy = round(damage_enemy)
+                            mp_deplete_player = spells[player["hero"]["spells"][idx]]["cost"]
+                            clear()
+                            print_frame_2()
+                            print_frame()
+                            print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
+                            enemy_animation(heal_hp_enemy, damage_enemy)
+                            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+                            print_slow(f"\nDealt {damage_enemy} damage.")
+                            damage_enemy = mp_deplete_player = 0
+                            time.sleep(1)
                             break
                     else:
                         print_slow("\nNot enough MP.")
@@ -336,35 +428,173 @@ Press enter to go back.""")
                     print_slow("\nYou do not know that spell.")
                     time.sleep(1)
                     clear()
-                
-        #ENEMY TURN [FOR NOW]
+
+            elif choice == "3":
+                #PLAYER TURN [ITEM]
+                clear()
+                print(f"""
+ ____________________________________
+¦
+¦ 1: [{player["other"]["inv"][0]}]
+¦ 2: [{player["other"]["inv"][1]}]
+¦ 3: [{player["other"]["inv"][2]}]
+¦ 4: [{player["other"]["inv"][3]}]
+¦ 5: [{player["other"]["inv"][4]}]
+¦ 6: [{player["other"]["inv"][5]}]
+¦ 7: [{player["other"]["inv"][6]}]
+¦ 8: [{player["other"]["inv"][7]}]
+¦____________________________________
+
+What item will you use?
+Press enter to go back.""")
+                choice_item = input("\n--> ")
+                if choice_item.strip() == "":
+                    continue
+                try:
+                    idx = int(choice_item) - 1
+                except ValueError:
+                    print_slow("\nInvalid choice. Please select again.")
+                    time.sleep(1)
+                    clear()
+                    continue
+                if player["other"]["inv"][idx] == "---":
+                    print_slow("\nThere is no item in that slot.")
+                    time.sleep(1)
+                    continue
+                item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player)
+                break
+
+            elif choice == "4":
+                #PLAYER TURN [DEFEND]
+                clear()
+                print_frame_2()
+                print_frame()
+                defend_player = True
+                player["hero"]["def"] *= 1.5
+                if player["hero"]["def"] % 1 == 0:
+                    player["hero"]["def"] = int(player["hero"]["def"])
+                else:
+                    player["hero"]["def"] = round(player["hero"]["def"])
+                print_slow(f"{player["hero"]["name"]} defended.")
+                time.sleep(1)
+                break
+
+            elif choice == "5":
+                #PLAYER TURN [RUN]
+                clear()
+                print_frame_2()
+                print_frame()
+                print_slow(f"{player["hero"]["name"]} tried to run")
+                print_slow2("...")
+                if random.randint(1,100) >= 75:
+                    run = True
+                    print_slow("\nAnd did!")
+                    time.sleep(1)
+                    break
+                else:
+                    print_slow("\nAnd failed!")
+                    time.sleep(1)
+                    break
+        if run == True:
+            run = False
+            break
+
         if enemies["enemy"]["hp"] != 0:
-            clear()
-            print_frame_2()
-            print_frame()
-            print_slow(f"{enemies[1]["name"]} attacks!")
-            damage_player = enemies[1]["atk"] - (player["hero"]["def"]/2)
-            if damage_player % 1 == 0:
-                damage_player = int(damage_player)
+            #ENEMY TURN
+            if enemies["enemy"]["spells"] != "None":
+                enemy_choice = random.randint(1,2)
             else:
-                damage_player = round(damage_player)
-            damage_player += random.randint(-2,4)
-            if damage_player <= 0:
-                damage_player = 1
-            player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-            print_slow(f"\nDealt {damage_player} damage.")
-            time.sleep(1)
+                enemy_choice = 1
+            if enemy_choice == 1:
+                #ENEMY TURN [FIGHT]
+                clear()
+                print_frame_2()
+                print_frame()
+                print_slow(f"{enemies[1]["name"]} attacks!")
+                if random.randint(1,100) > 5:
+                    if random.randint(1,100) <= 15:
+                        print_slow(" CRITICAL HIT!!")
+                        damage_player = (enemies[1]["atk"] - (player["hero"]["def"]/2)) * 1.5
+                    else:
+                        damage_player = enemies[1]["atk"] - (player["hero"]["def"]/2)
+                    if damage_player % 1 == 0:
+                        damage_player = int(damage_player)
+                    else:
+                        damage_player = round(damage_player)
+                    damage_player += random.randint(-2,4)
+                    if damage_player <= 0:
+                        damage_player = 1
+                    player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+                    print_slow(f"\nDealt {damage_player} damage.")
+                    damage_player = 0
+                    time.sleep(1)
+                else:
+                    print_slow(" Missed!")
+                    time.sleep(1)
+            elif enemy_choice == 2:
+                #ENEMY TURN [MAGIC]
+                clear()
+                print_frame_2()
+                print_frame()
+                if spells[enemies["enemy"]["spells"]]["type"] == "Heal":
+                    heal_hp_enemy = enemies["enemy"]["maxhp"] * spells[enemies["enemy"]["spell"]]["multiplier"]
+                    if heal_hp_enemy % 1 == 0:
+                        heal_hp_enemy = int(heal_hp_enemy)
+                    else:
+                        heal_hp_enemy = round(heal_hp_enemy)
+                    clear()
+                    print_frame_2()
+                    print_frame()
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    enemy_animation(heal_hp_player, damage_player)
+                    if enemies["enemy"]["hp"] == enemies["enemy"]["maxhp"]:
+                        print_slow(f"\nRecovered All HP.")
+                    else:
+                        print_slow(f"\nRecovered {heal_hp_enemy} HP.")
+                    heal_hp_enemy = 0
+                    time.sleep(1)
+                elif spells[enemies["enemy"]["spells"]]["type"] == "Damage":
+                    damage_player = (enemies["enemy"]["magic"] * spells[player["hero"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
+                    if damage_player % 1 == 0:
+                        damage_player = int(damage_player)
+                    else:
+                        damage_player = round(damage_player)
+                    clear()
+                    print_frame_2()
+                    print_frame()
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+                    print_slow(f"\nDealt {damage_player} damage.")
+                    damage_player = 0
+                    time.sleep(1)
+                elif spells[enemies["enemy"]["spells"]]["type"] == "Half":
+                    damage_player = player["hero"]["hp"] / 2
+                    if damage_player % 1 == 0:
+                        damage_player = int(damage_player)
+                    else:
+                        damage_player = round(damage_player)
+                    clear()
+                    print_frame_2()
+                    print_frame()
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
+                    print_slow(f"\nDealt {damage_player} damage.")
+                    damage_player = 0
+                    time.sleep(1)
+                
         if enemies["enemy"]["hp"] == 0:
             clear()
             
             enemies["enemy"]["name"] = " "
             enemies["enemy"]["ascii"] = load_ascii("ascii/empty.txt")
-            battle_loop = False
             
             print_frame_2()
             print_frame()
             
-            print_slow("YOU WIN!")
+            print_slow(f"""YOU WIN!
+You got {enemies["enemy"]["xp_given"]} XP!""")
+            player["other"]["xp"] += enemies["enemy"]["xp_given"]
+            player["other"]["next_lv"] -= enemies["enemy"]["xp_given"]
             time.sleep(2)
             break
         elif player["hero"]["hp"] == 0:
@@ -390,11 +620,11 @@ player = { #All Player info
         "atk":
             5,
         "def":
-            0,
+            1,
         "magic":
-            2,
+            4,
         "spells":
-            ["Heal","---","---","---","---","---","---","---"]
+            ["Heal","Fireball","Split","---","---","---","---","---"]
     },
     "other": { #Other stats
         "weapon":
@@ -430,7 +660,7 @@ player = { #All Player info
         "gold":
             0,
         "inv":
-            ["---","---","---","---","---","---","---","---"],
+            ["Jelly Juice","Green Tea","Golden Juice","---","---","---","---","---"],
         "ascii":
             load_ascii("ascii/player.txt")
     }
@@ -441,19 +671,23 @@ enemies = { #All enemy info
         "name":
             "Slime",
         "hp":
-            150,
+            15,
         "maxhp":
-            150,
+            15,
         "mp":
             0,
         "maxmp":
             0,
         "atk":
-            4,
+            5,
         "def":
             0,
         "magic":
-            10,
+            3,
+        "spells":
+            "None",
+        "xp_given":
+            1,
         "ascii":
             load_ascii("ascii/slime.txt")
     },
@@ -469,11 +703,15 @@ enemies = { #All enemy info
         "maxmp":
             10,
         "atk":
-            3,
+            4,
         "def":
             0,
         "magic":
-            8,
+            4,
+        "spells":
+            "Split",
+        "xp_given":
+            1,
         "ascii":
             load_ascii("ascii/bat.txt")
     },
@@ -494,6 +732,10 @@ enemies = { #All enemy info
             0,
         "magic":
             0,
+        "spells":
+            " ",
+        "xp_given":
+            0,
         "hp_bar":
             " ",
         "ascii":
@@ -504,11 +746,11 @@ enemies = { #All enemy info
 spells = { #All Spell info
     "---": { #Placeholder info
         "cost":
-            "?",
+            0,
         "type":
-            "?",
+            "Damage",
         "multiplier":
-            "?"
+            9999999999
     },
     "Heal": { #All Heal info
         "cost":
@@ -526,13 +768,40 @@ spells = { #All Spell info
         "multiplier":
             2
     },
-    "Drain": { #All Drain info
+    "Split": { #All Drain info
         "cost":
-            3,
+            5,
         "type":
             "Half",
         "multiplier":
             0
+    }
+}
+
+items = { #All Item info
+    "---": { #Placeholder info
+        "recovery":
+            9999999999,
+        "type":
+            "Health and MP"
+    },
+    "Jelly Juice": { #All Jelly Juice info
+        "recovery":
+            20,
+        "type":
+            "Health"
+    },
+    "Green Tea": { #All Green Tea info
+        "recovery":
+            1,
+        "type":
+            "MP"
+    },
+    "Golden Juice": { #All Golden Juice info
+        "recovery":
+            9999999999,
+        "type":
+            "Health and MP"
     }
 }
 
@@ -544,8 +813,14 @@ damage_enemy = 0
 mp_deplete_enemy = 0
 heal_hp_enemy = 0
 heal_mp_enemy = 0
+defend_player = False
+defend_enemy = False
+run = False
+enemy_choice = 0
+
 hp_bar(player)
 mp_stars(player)
+
 enemies["enemy"]["name"] = enemies[1]["name"]
 enemies["enemy"]["hp"] = enemies[1]["hp"]
 enemies["enemy"]["maxhp"] = enemies[1]["maxhp"]
@@ -554,6 +829,8 @@ enemies["enemy"]["maxmp"] = enemies[1]["maxmp"]
 enemies["enemy"]["atk"] = enemies[1]["atk"]
 enemies["enemy"]["def"] = enemies[1]["def"]
 enemies["enemy"]["magic"] = enemies[1]["magic"]
+enemies["enemy"]["spells"] = enemies[1]["spells"]
+enemies["enemy"]["xp_given"] = enemies[1]["xp_given"]
 enemies["enemy"]["ascii"] = enemies[1]["ascii"]
 hp_bar_enemy(enemies)
-battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells)
+battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice)
