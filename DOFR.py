@@ -17,6 +17,275 @@ def print_slow2(str): #Prints out text slowly
 def clear(): #Clears all text on screen
     os.system('cls' if os.name == 'nt' else 'clear')
 
+MAPS = {
+    "r_1": [
+        "### ####################",
+        "#......#...............#",
+        "#......#......T........#",
+        "#..N...#...............#",
+        "#......######.##########",
+        "#......................#",
+        "#.###########..........#",
+        "#...........#..........#",
+        "###########/############",
+    ],
+    "r_2": [
+        "########################",
+        "#.......T.......#......#",
+        "#...............#...N..#",
+        "#...............#......#",
+        "/...................... ",
+        "#...######......#......#",
+        "#...#.T..#......#......#",
+        "#...#...........#......#",
+        "### ####################",
+    ],
+    "r_3": [
+        "#################",
+        "#.....T.N.T.....#",
+        "#............... ",
+        "#...............#",
+        "#################",
+    ],
+    "r_4": [
+        "########### ############",
+        "#........##.####.......#",
+        "#.######.##.####.#####.#",
+        "#.######....####.#...#.#",
+        "#.##############.#.#.#.#",
+        "#................#.#...#",
+        "##################.#####",
+        "###########........#####",
+        "###########/############",
+    ],
+    "r_5": [
+        "########### ############",
+        "#...#.....#.....#......#",
+        "#.#.#.###.#####.#.####.#",
+        "#.#...###.....#...####.#",
+        "#.###########.########.#",
+        "#...........#..........#",
+        "###########.############",
+        "###########.############",
+        "###########/############",
+    ],
+}
+
+WARPS = {
+    ("r_1", 0, 3): ("r_2", 7, 3),
+    ("r_2", 8, 3): ("r_1", 1, 3),
+    ("r_2", 4, 0): ("r_3", 2, 15),
+    ("r_3", 2, 16): ("r_2", 4, 1),
+    ("r_1", 8, 11): ("r_4", 1, 11),
+    ("r_4", 0, 11): ("r_1", 7, 11),
+    ("r_4", 8, 11): ("r_5", 1, 11),
+    ("r_5", 0, 11): ("r_4", 7, 11),
+}
+
+def clear():
+    os.system("cls" if os.name == "nt" else "clear")
+
+for key, rows in MAPS.items():
+    MAPS[key] = [list(row) for row in rows]
+
+def find_start(game_map):
+    #Fail save if the player is stuck in a wall
+    for r,row in enumerate(game_map):
+        for c,ch in enumerate(row):
+            if ch == ".":
+                return r,c
+    return 1,1
+
+def draw(game_map, player_pos, messages=None):
+    clear()
+    r0,c0 = player_pos
+    for r,row in enumerate(game_map):
+        line = ""
+        for c,ch in enumerate(row):
+            if (r,c) == (r0,c0):
+                line += "@"
+            else:
+                line += ch
+        print(line)
+    if messages:
+        print("\n" + "\n".join(messages[-4:]))
+
+def can_move(game_map, r,c):
+    if r < 0 or c < 0 or r >= len(game_map) or c >= len(game_map[0]):
+        return False
+    return game_map[r][c] in ("."," ")#Walkable tiles
+
+def interact_at(game_map, r,c, messages):
+    ch = game_map[r][c]
+    if ch == "T":
+        messages.append("You found a treasure!")
+        game_map[r][c] = "."
+        if current_map == "r_2":
+            if "---" in player["other"]["inv"]:
+                player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
+    elif ch == "N":
+        if current_map == "r_1":
+            messages.append("NPC: 'A hero! Wait you're a rogue? Boring...'")
+        elif current_map == "r_2":
+            messages.append("NPC: '67.'")
+        elif current_map == "r_3":
+            messages.append("NPC: 'You found the secret too?!'")
+    if ch == "/":
+        messages.append("A cracked wall. Seems breakable...")
+        if "Bomb" in player["other"]["inv"]:
+            messages.append("Use Bomb? [Y/N]")
+            draw(game_map, (player_r, player_c), messages)
+            choice_map = input("--> ")
+            if choice_map.lower() == "y":
+                messages.append(f"{player["hero"]["name"]} blew up the wall.")
+                game_map[r][c] = " "
+                del player["other"]["inv"][player["other"]["inv"].index("Bomb")]
+                player["other"]["inv"].append("---")
+            else:
+                messages.append("You decided to ignore it.")
+        
+def main():
+    global current_map, game_map, player_r, player_c, enemies, e_num, hp_bar, mp_stars, hp_bar_enemy, idx, choice_item, player, items, heal_hp_player, heal_mp_player
+    player_r, player_c = 7,19
+    messages = ["Use WASD to move, E to interact, Q to use items and check stats."]
+
+    while True:
+        draw(game_map, (player_r, player_c), messages)
+        choice_map = input("--> ").strip().lower()
+        if not choice_map:
+            continue
+        if choice_map in ("w","a","s","d"):
+            dr = {"w":-1,"s":1,"a":0,"d":0}[choice_map]
+            dc = {"w":0,"s":0,"a":-1,"d":1}[choice_map]
+            nr, nc = player_r + dr, player_c + dc
+            if can_move(game_map, nr, nc):
+                player_r, player_c = nr, nc
+                if (current_map, nr, nc) in WARPS:
+                    dest_map, dest_r, dest_c = WARPS[(current_map, nr, nc)]
+                    current_map = dest_map
+                    game_map = MAPS[current_map]
+                    player_r, player_c = dest_r, dest_c
+                    continue
+                if random.randint(1,100) <= 0:
+                    print_slow("\n(!) BATTLE START!")
+                    time.sleep(3)
+                    e_num = random.randint(1,1)
+                    enemies["enemy"]["name"] = enemies[e_num]["name"]
+                    enemies["enemy"]["hp"] = enemies[e_num]["hp"]
+                    enemies["enemy"]["maxhp"] = enemies[e_num]["maxhp"]
+                    enemies["enemy"]["mp"] = enemies[e_num]["mp"]
+                    enemies["enemy"]["maxmp"] = enemies[e_num]["maxmp"]
+                    enemies["enemy"]["atk"] = enemies[e_num]["atk"]
+                    enemies["enemy"]["def"] = enemies[e_num]["def"]
+                    enemies["enemy"]["magic"] = enemies[e_num]["magic"]
+                    enemies["enemy"]["spells"] = enemies[e_num]["spells"]
+                    enemies["enemy"]["xp_given"] = enemies[e_num]["xp_given"]
+                    enemies["enemy"]["ascii"] = enemies[e_num]["ascii"]
+                    hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
+                    battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice)
+            else:
+                messages.append("You bump into something.")
+        elif choice_map == "e":
+            interacted = False
+            for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+                nr, nc = player_r+dr, player_c+dc
+                if 0 <= nr < len(game_map) and 0 <= nc < len(game_map[0]):
+                    if game_map[nr][nc] in ("T", "N", "/"):
+                        interact_at(game_map, nr, nc, messages)
+                        interacted = True
+                        break
+            if not interacted:
+                messages.append("You see nothing to interact with.")
+        elif choice_map == "q":
+            clear()
+            hp_bar(player), mp_stars(player)
+            print(f"""{player["hero"]["name"]} LV: {player["other"]["lv"]}
+HP: {player["other"]["hp_bar"]} {player["hero"]["hp"]} / {player["hero"]["maxhp"]}
+MP: {player["other"]["mp_stars"]}
+ATK: {player["hero"]["atk"]} DEF: {player["hero"]["def"]} MAGIC: {player["hero"]["magic"]}
+XP: {player["other"]["xp"]}
+XP needed for next LV: {player["other"]["next_lv"]}
+ ____________________________________
+¦
+¦ 1: [{player["other"]["inv"][0]}]
+¦ 2: [{player["other"]["inv"][1]}]
+¦ 3: [{player["other"]["inv"][2]}]
+¦ 4: [{player["other"]["inv"][3]}]
+¦ 5: [{player["other"]["inv"][4]}]
+¦ 6: [{player["other"]["inv"][5]}]
+¦ 7: [{player["other"]["inv"][6]}]
+¦ 8: [{player["other"]["inv"][7]}]
+¦____________________________________
+
+What item will you use?
+Press enter to go back.""")
+            choice_item = input("\n--> ")
+            if choice_item.strip() == "":
+                continue
+            try:
+                idx = int(choice_item) - 1
+            except ValueError:
+                print_slow("\nInvalid choice. Please select again.")
+                time.sleep(1)
+                clear()
+                continue
+            if player["other"]["inv"][idx] == "---":
+                print_slow("\nThere is no item in that slot.")
+                time.sleep(1)
+                continue
+            if player["other"]["inv"][idx] != "---":
+                if items[player["other"]["inv"][idx]]["type"] == "Health": #Healing HP
+                    heal_hp_player = items[player["other"]["inv"][idx]]["recovery"]
+                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["hero"]["hp"] += heal_hp_player
+                    if player["hero"]["hp"] >= player["hero"]["maxhp"]:
+                        player["hero"]["hp"] = player["hero"]["maxhp"]
+                        print_slow(f"\nRecovered All HP.")
+                    else:
+                        print_slow(f"\nRecovered {heal_hp_player} HP.")
+                    heal_hp_player = 0
+                    del player["other"]["inv"][idx]
+                    player["other"]["inv"].append("---")
+                    time.sleep(1)
+                elif items[player["other"]["inv"][idx]]["type"] == "MP": #Healing MP
+                    heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
+                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["hero"]["mp"] += heal_mp_player
+                    if player["hero"]["mp"] >= player["hero"]["maxmp"]:
+                        player["hero"]["mp"] = player["hero"]["maxmp"]
+                        print_slow(f"\nRecovered All MP.")
+                    else:
+                        print_slow(f"\nRecovered {heal_mp_player} MP.")
+                    heal_mp_player = 0
+                    del player["other"]["inv"][idx]
+                    player["other"]["inv"].append("---")
+                    time.sleep(1)
+                elif items[player["other"]["inv"][idx]]["type"] == "Health and MP": #Healing both HP and MP
+                    heal_hp_player = heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
+                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["hero"]["hp"] += heal_hp_player
+                    if player["hero"]["hp"] >= player["hero"]["maxhp"]:
+                        player["hero"]["hp"] = player["hero"]["maxhp"]
+                        print_slow(f"\nRecovered All HP ")
+                    else:
+                        print_slow(f"\nRecovered {heal_hp_player} HP ")
+                    player["hero"]["mp"] += heal_mp_player
+                    if player["hero"]["mp"] >= player["hero"]["maxmp"]:
+                        player["hero"]["mp"] = player["hero"]["maxmp"]
+                        print_slow(f"and All MP.")
+                    else:
+                        print_slow(f"and {heal_mp_player} MP.")
+                    heal_hp_player = heal_mp_player = 0
+                    del player["other"]["inv"][idx]
+                    player["other"]["inv"].append("---")
+                    time.sleep(1)
+                elif items[player["other"]["inv"][idx]]["type"] == "Other": #Other
+                    print_slow(f"""\n{player["hero"]["name"]} tried to used {player["other"]["inv"][idx]}.
+But nothing happened.""")
+                    time.sleep(1)
+        else:
+            messages.append("Unknown command. Use WASD/E/Q.")
+
 def load_ascii(filename): #Loads ASCII/ASCII text file
     with open(filename, "r", encoding="utf-8") as f:
         return f.read()
@@ -225,7 +494,14 @@ def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player
             del player["other"]["inv"][idx]
             player["other"]["inv"].append("---")
             time.sleep(1)
-
+        elif items[player["other"]["inv"][idx]]["type"] == "Other": #Other
+            clear()
+            print_frame_2()
+            print_frame()
+            print_slow(f"""\n{player["hero"]["name"]} tried to used {player["other"]["inv"][idx]}.
+But nothing happened.""")
+            time.sleep(1)
+            
 def level_stats(player): #All stats going up when levelling up
     print_slow(f"""\n\nYou leveled up!
 HP: {player["hero"]["maxhp"]} --> HP: {player["hero"]["maxhp"]+7}
@@ -688,6 +964,8 @@ enemies = { #All enemy info
             "None",
         "xp_given":
             1,
+        "gold_given":
+            1,
         "ascii":
             load_ascii("ascii/slime.txt")
     },
@@ -712,6 +990,8 @@ enemies = { #All enemy info
             "Split",
         "xp_given":
             1,
+        "gold_given":
+            1,
         "ascii":
             load_ascii("ascii/bat.txt")
     },
@@ -735,6 +1015,8 @@ enemies = { #All enemy info
         "spells":
             " ",
         "xp_given":
+            0,
+        "gold_given":
             0,
         "hp_bar":
             " ",
@@ -802,6 +1084,12 @@ items = { #All Item info
             9999999999,
         "type":
             "Health and MP"
+    },
+    "Bomb": { #All Bomb info
+        "recovery":
+            0,
+        "type":
+            "Other"
     }
 }
 
@@ -817,20 +1105,9 @@ defend_player = False
 defend_enemy = False
 run = False
 enemy_choice = 0
+e_num = 0
 
-hp_bar(player)
-mp_stars(player)
-
-enemies["enemy"]["name"] = enemies[1]["name"]
-enemies["enemy"]["hp"] = enemies[1]["hp"]
-enemies["enemy"]["maxhp"] = enemies[1]["maxhp"]
-enemies["enemy"]["mp"] = enemies[1]["mp"]
-enemies["enemy"]["maxmp"] = enemies[1]["maxmp"]
-enemies["enemy"]["atk"] = enemies[1]["atk"]
-enemies["enemy"]["def"] = enemies[1]["def"]
-enemies["enemy"]["magic"] = enemies[1]["magic"]
-enemies["enemy"]["spells"] = enemies[1]["spells"]
-enemies["enemy"]["xp_given"] = enemies[1]["xp_given"]
-enemies["enemy"]["ascii"] = enemies[1]["ascii"]
-hp_bar_enemy(enemies)
-battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice)
+current_map = "r_1"
+game_map = MAPS[current_map]
+player_r, player_c = 7, 19
+main()
