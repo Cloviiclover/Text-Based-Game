@@ -1,6 +1,6 @@
 import sys,os,time,random
 from colorama import init
-init() #This is so that sys clear can work in CMD
+init() #This is so that sys clear can work in terminal/os/whatever and so no issues happen
 
 def print_slow(str): #Prints out text slowly
     for letter in str:
@@ -8,7 +8,7 @@ def print_slow(str): #Prints out text slowly
         sys.stdout.flush()
         time.sleep(0.05)
 
-def print_slow2(str): #Prints out text slowly
+def print_slow2(str): #Prints out text slowly (but faster)
     for letter in str:
         sys.stdout.write(letter)
         sys.stdout.flush()
@@ -17,7 +17,37 @@ def print_slow2(str): #Prints out text slowly
 def clear(): #Clears all text on screen
     os.system('cls' if os.name == 'nt' else 'clear')
 
-MAPS = {
+
+MAPS = { #All maps/rooms in the game
+    "o_1": [
+        "################# #################",
+        "#.........#.............#.........#",
+        "#.........#..N..........#.........#",
+        "#.........#.....#.#.....#.........#",
+        "#......##.#######.#######.##......#",
+        "#......#T.#.............#..#......#",
+        "#......####.............####......#",
+        "#.................................#",
+        "#.................................#",
+        "#.................................#",
+        "#.................................#",
+        "#.................................#",
+        "#.................................#",
+        "#.........#.............#.........#",
+        "#.........#.............#.........#",
+        "#.........#.............#.........#",
+        "#.........####### #######.........#",
+        "#.........###############.........#",
+        "#.........#S   H   O   P#.........#",
+        "###################################",
+    ],
+    "o_2": [
+        "#################",
+        "#..#TTT#N#TTT#..#",
+        "#..#####.#####..#",
+        "#...............#",
+        "######## ########",
+    ],
     "r_1": [
         "### ####################",
         "#......#...............#",
@@ -27,7 +57,7 @@ MAPS = {
         "#......................#",
         "#.###########..........#",
         "#...........#..........#",
-        "###########/############",
+        "###########/####### ####",
     ],
     "r_2": [
         "########################",
@@ -42,8 +72,8 @@ MAPS = {
     ],
     "r_3": [
         "#################",
-        "#.....T.N.T.....#",
-        "#............... ",
+        "#.......N.......#",
+        "#.T............. ",
         "#...............#",
         "#################",
     ],
@@ -69,9 +99,35 @@ MAPS = {
         "###########.############",
         "###########/############",
     ],
+    "r_6": [
+        "################ #######",
+        "#.T.#.....#............#",
+        "#.........#............#",
+        "#####.....#####...######",
+        " ......................#",
+        "#####..............#...#",
+        "#..................#...#",
+        "#.N.#..............#.T.#",
+        "########################",
+    ],
+    "r_7": [
+        "########### ############",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "###########B############",
+        "#......................#",
+        "#.....T....T....T... ..#",
+        "#..........N...........#",
+        "########################",
+    ]
 }
 
 WARPS = {
+    ("o_1", 16, 17): ("o_2", 3, 8),
+    ("o_2", 4, 8): ("o_1", 15, 17),
+    ("o_1", 0, 17): ("r_1", 7, 19),
+    ("r_1", 8, 19): ("o_1", 1, 17),
     ("r_1", 0, 3): ("r_2", 7, 3),
     ("r_2", 8, 3): ("r_1", 1, 3),
     ("r_2", 4, 0): ("r_3", 2, 15),
@@ -80,21 +136,15 @@ WARPS = {
     ("r_4", 0, 11): ("r_1", 7, 11),
     ("r_4", 8, 11): ("r_5", 1, 11),
     ("r_5", 0, 11): ("r_4", 7, 11),
+    ("r_2", 4, 23): ("r_6", 4, 1),
+    ("r_6", 4, 0): ("r_2", 4, 22),
+    ("r_5", 8, 11): ("r_7", 1, 11),
+    ("r_7", 0, 11): ("r_5", 7, 11),
+    ("r_7", 6, 20): ("r_1", 7, 19),
 }
-
-def clear():
-    os.system("cls" if os.name == "nt" else "clear")
 
 for key, rows in MAPS.items():
     MAPS[key] = [list(row) for row in rows]
-
-def find_start(game_map):
-    #Fail save if the player is stuck in a wall
-    for r,row in enumerate(game_map):
-        for c,ch in enumerate(row):
-            if ch == ".":
-                return r,c
-    return 1,1
 
 def draw(game_map, player_pos, messages=None):
     clear()
@@ -118,35 +168,92 @@ def can_move(game_map, r,c):
 def interact_at(game_map, r,c, messages):
     ch = game_map[r][c]
     if ch == "T":
-        messages.append("You found a treasure!")
-        game_map[r][c] = "."
         if current_map == "r_2":
             if "---" in player["other"]["inv"]:
+                messages.append("You found a treasure!")
                 player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
+                game_map[r][c] = "."
+            else:
+                messages.append("You don't have any space.")
+        elif current_map == "r_1" or current_map == "r_6":
+            if "---" in player["other"]["inv"]:
+                messages.append("You found a treasure!")
+                loot = random.randint(1,4)
+                if loot == 1:
+                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Jelly Juice"
+                    game_map[r][c] = "."
+                elif loot == 2:
+                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Green Tea"
+                    game_map[r][c] = "."
+                elif loot == 3:
+                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Golden Juice"
+                    game_map[r][c] = "."
+                elif loot == 4:
+                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
+                    game_map[r][c] = "."
+            else:
+                messages.append("You don't have any space.")
+        elif current_map == "r_3" or current_map == "r_7":
+            if "---" in player["other"]["inv"]:
+                messages.append("You found a treasure!")
+                player["other"]["inv"][player["other"]["inv"].index("---")] = "Golden Juice"
+                game_map[r][c] = "."
+            else:
+                messages.append("You don't have any space.")
     elif ch == "N":
         if current_map == "r_1":
             messages.append("NPC: 'A hero! Wait you're a rogue? Boring...'")
         elif current_map == "r_2":
-            messages.append("NPC: '67.'")
+            messages.append("NPC: 'It feels like the deeper you explore")
+            messages.append("the dungeon the less people there are.'")
         elif current_map == "r_3":
             messages.append("NPC: 'You found the secret too?!'")
-    if ch == "/":
+        elif current_map == "r_6":
+            messages.append("NPC: 'Many heroes explore the dungeon")
+            messages.append("and never come back.'")
+        elif current_map == "r_7":
+            messages.append("NPC: 'Thank you so much! I was so afraid!")
+            messages.append("Walk into the empty space to go back")
+            messages.append("to the first room.'")
+    elif ch == "/":
         messages.append("A cracked wall. Seems breakable...")
         if "Bomb" in player["other"]["inv"]:
             messages.append("Use Bomb? [Y/N]")
             draw(game_map, (player_r, player_c), messages)
             choice_map = input("--> ")
             if choice_map.lower() == "y":
-                messages.append(f"{player["hero"]["name"]} blew up the wall.")
+                messages.append(f"{player["rogue"]["name"]} blew up the wall.")
                 game_map[r][c] = " "
                 del player["other"]["inv"][player["other"]["inv"].index("Bomb")]
                 player["other"]["inv"].append("---")
             else:
                 messages.append("You decided to ignore it.")
+    elif ch == "B":
+        if current_map == "r_7":
+            messages.append("BOSS: 'WHY DID YOU COME HERE? DIE!'")
+            draw(game_map, (player_r, player_c), messages)
+            time.sleep(2)
+            print_slow("\n(!) BATTLE START!")
+            time.sleep(3)
+            enemies["enemy"]["name"] = enemies[2]["name"]
+            enemies["enemy"]["hp"] = enemies[2]["hp"]
+            enemies["enemy"]["maxhp"] = enemies[2]["maxhp"]
+            enemies["enemy"]["mp"] = enemies[2]["mp"]
+            enemies["enemy"]["maxmp"] = enemies[2]["maxmp"]
+            enemies["enemy"]["atk"] = enemies[2]["atk"]
+            enemies["enemy"]["def"] = enemies[2]["def"]
+            enemies["enemy"]["magic"] = enemies[2]["magic"]
+            enemies["enemy"]["spells"] = enemies[2]["spells"]
+            enemies["enemy"]["xp_given"] = enemies[2]["xp_given"]
+            enemies["enemy"]["gold_given"] = enemies[2]["gold_given"]
+            enemies["enemy"]["ascii"] = enemies[2]["ascii"]
+            hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
+            battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx)
+        if enemies["enemy"]["hp"] <= 0:
+            game_map[r][c] = "."
         
 def main():
     global current_map, game_map, player_r, player_c, enemies, e_num, hp_bar, mp_stars, hp_bar_enemy, idx, choice_item, player, items, heal_hp_player, heal_mp_player
-    player_r, player_c = 7,19
     messages = ["Use WASD to move, E to interact, Q to use items and check stats."]
 
     while True:
@@ -166,7 +273,8 @@ def main():
                     game_map = MAPS[current_map]
                     player_r, player_c = dest_r, dest_c
                     continue
-                if random.randint(1,100) <= 0:
+                if random.randint(1,100) <= 100 and current_map != "o_1" and current_map != "o_2":
+                    draw(game_map, (player_r, player_c), messages)
                     print_slow("\n(!) BATTLE START!")
                     time.sleep(3)
                     e_num = random.randint(1,1)
@@ -180,9 +288,10 @@ def main():
                     enemies["enemy"]["magic"] = enemies[e_num]["magic"]
                     enemies["enemy"]["spells"] = enemies[e_num]["spells"]
                     enemies["enemy"]["xp_given"] = enemies[e_num]["xp_given"]
+                    enemies["enemy"]["gold_given"] = enemies[e_num]["gold_given"]
                     enemies["enemy"]["ascii"] = enemies[e_num]["ascii"]
                     hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
-                    battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice)
+                    battle(player, enemies, damage_player, damage_enemy, heal_hp_player, mp_deplete_player, heal_hp_enemy, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx)
             else:
                 messages.append("You bump into something.")
         elif choice_map == "e":
@@ -190,7 +299,7 @@ def main():
             for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:
                 nr, nc = player_r+dr, player_c+dc
                 if 0 <= nr < len(game_map) and 0 <= nc < len(game_map[0]):
-                    if game_map[nr][nc] in ("T", "N", "/"):
+                    if game_map[nr][nc] in ("T", "N", "/", "B"):
                         interact_at(game_map, nr, nc, messages)
                         interacted = True
                         break
@@ -199,10 +308,10 @@ def main():
         elif choice_map == "q":
             clear()
             hp_bar(player), mp_stars(player)
-            print(f"""{player["hero"]["name"]} LV: {player["other"]["lv"]}
-HP: {player["other"]["hp_bar"]} {player["hero"]["hp"]} / {player["hero"]["maxhp"]}
-MP: {player["other"]["mp_stars"]}
-ATK: {player["hero"]["atk"]} DEF: {player["hero"]["def"]} MAGIC: {player["hero"]["magic"]}
+            print(f"""{player["rogue"]["name"]} LV: {player["other"]["lv"]}
+HP: {player["other"]["hp_bar"]} {player["rogue"]["hp"]} / {player["rogue"]["maxhp"]}
+MP: {player["other"]["mp_stars"]} {player["rogue"]["mp"]} / {player["rogue"]["maxmp"]}
+ATK: {player["rogue"]["atk"]} DEF: {player["rogue"]["def"]} MAGIC: {player["rogue"]["magic"]}
 XP: {player["other"]["xp"]}
 XP needed for next LV: {player["other"]["next_lv"]}
  ____________________________________
@@ -229,6 +338,11 @@ Press enter to go back.""")
                 time.sleep(1)
                 clear()
                 continue
+            if idx < 0 or idx >= len(player["other"]["inv"]):
+                print_slow("\nInvalid choice. Please select again.")
+                time.sleep(1)
+                clear()
+                continue
             if player["other"]["inv"][idx] == "---":
                 print_slow("\nThere is no item in that slot.")
                 time.sleep(1)
@@ -236,10 +350,10 @@ Press enter to go back.""")
             if player["other"]["inv"][idx] != "---":
                 if items[player["other"]["inv"][idx]]["type"] == "Health": #Healing HP
                     heal_hp_player = items[player["other"]["inv"][idx]]["recovery"]
-                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
-                    player["hero"]["hp"] += heal_hp_player
-                    if player["hero"]["hp"] >= player["hero"]["maxhp"]:
-                        player["hero"]["hp"] = player["hero"]["maxhp"]
+                    print_slow(f"\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["rogue"]["hp"] += heal_hp_player
+                    if player["rogue"]["hp"] >= player["rogue"]["maxhp"]:
+                        player["rogue"]["hp"] = player["rogue"]["maxhp"]
                         print_slow(f"\nRecovered All HP.")
                     else:
                         print_slow(f"\nRecovered {heal_hp_player} HP.")
@@ -249,10 +363,10 @@ Press enter to go back.""")
                     time.sleep(1)
                 elif items[player["other"]["inv"][idx]]["type"] == "MP": #Healing MP
                     heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
-                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
-                    player["hero"]["mp"] += heal_mp_player
-                    if player["hero"]["mp"] >= player["hero"]["maxmp"]:
-                        player["hero"]["mp"] = player["hero"]["maxmp"]
+                    print_slow(f"\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["rogue"]["mp"] += heal_mp_player
+                    if player["rogue"]["mp"] >= player["rogue"]["maxmp"]:
+                        player["rogue"]["mp"] = player["rogue"]["maxmp"]
                         print_slow(f"\nRecovered All MP.")
                     else:
                         print_slow(f"\nRecovered {heal_mp_player} MP.")
@@ -262,16 +376,16 @@ Press enter to go back.""")
                     time.sleep(1)
                 elif items[player["other"]["inv"][idx]]["type"] == "Health and MP": #Healing both HP and MP
                     heal_hp_player = heal_mp_player = items[player["other"]["inv"][idx]]["recovery"]
-                    print_slow(f"\n{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
-                    player["hero"]["hp"] += heal_hp_player
-                    if player["hero"]["hp"] >= player["hero"]["maxhp"]:
-                        player["hero"]["hp"] = player["hero"]["maxhp"]
+                    print_slow(f"\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
+                    player["rogue"]["hp"] += heal_hp_player
+                    if player["rogue"]["hp"] >= player["rogue"]["maxhp"]:
+                        player["rogue"]["hp"] = player["rogue"]["maxhp"]
                         print_slow(f"\nRecovered All HP ")
                     else:
                         print_slow(f"\nRecovered {heal_hp_player} HP ")
-                    player["hero"]["mp"] += heal_mp_player
-                    if player["hero"]["mp"] >= player["hero"]["maxmp"]:
-                        player["hero"]["mp"] = player["hero"]["maxmp"]
+                    player["rogue"]["mp"] += heal_mp_player
+                    if player["rogue"]["mp"] >= player["rogue"]["maxmp"]:
+                        player["rogue"]["mp"] = player["rogue"]["maxmp"]
                         print_slow(f"and All MP.")
                     else:
                         print_slow(f"and {heal_mp_player} MP.")
@@ -280,8 +394,17 @@ Press enter to go back.""")
                     player["other"]["inv"].append("---")
                     time.sleep(1)
                 elif items[player["other"]["inv"][idx]]["type"] == "Other": #Other
-                    print_slow(f"""\n{player["hero"]["name"]} tried to used {player["other"]["inv"][idx]}.
+                    print_slow(f"""\n{player["rogue"]["name"]} tried to use {player["other"]["inv"][idx]}.
 But nothing happened.""")
+                    time.sleep(1)
+                    print_slow(f"\n\nThrow {player["other"]["inv"][idx]} away? [Y/N]")
+                    choice_map = input("\n\n--> ")
+                    if choice_map.lower() == "y":
+                        print_slow(f"\n{player["rogue"]["name"]} threw {player["other"]["inv"][idx]} away.")
+                        del player["other"]["inv"][idx]
+                        player["other"]["inv"].append("---")
+                    else:
+                        print_slow("\nYou decide to not do that.")
                     time.sleep(1)
         else:
             messages.append("Unknown command. Use WASD/E/Q.")
@@ -301,12 +424,14 @@ def print_frame(): #Prints Player's battle text file
     for line in ascii_lines:
         sys.stdout.write("\033[2K")
         sys.stdout.write(line.format(
-            player_name=player["hero"]["name"],
+            player_name=player["rogue"]["name"],
             player_lv=player["other"]["lv"],
             player_hp_bar=player["other"]["hp_bar"],
-            player_hp=player["hero"]["hp"],
-            player_maxhp=player["hero"]["maxhp"],
-            player_mp_stars=player["other"]["mp_stars"]
+            player_hp=player["rogue"]["hp"],
+            player_maxhp=player["rogue"]["maxhp"],
+            player_mp_stars=player["other"]["mp_stars"],
+            player_mp=player["rogue"]["mp"],
+            player_maxmp=player["rogue"]["maxmp"]
         ) + "\n")
     sys.stdout.flush()
 
@@ -329,9 +454,9 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
     num_lines_2 = len(ascii_lines_2)
     if heal_hp_player != 0: #HP Recovery animation
         for _ in range(heal_hp_player):
-            player["hero"]["hp"] += 1
-            if player["hero"]["hp"] > player["hero"]["maxhp"]:
-                player["hero"]["hp"] = player["hero"]["maxhp"]
+            player["rogue"]["hp"] += 1
+            if player["rogue"]["hp"] > player["rogue"]["maxhp"]:
+                player["rogue"]["hp"] = player["rogue"]["maxhp"]
                 break
 
             hp_bar(player)
@@ -348,9 +473,9 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
         
     if heal_mp_player != 0: #MP Recovery animation
         for _ in range(heal_mp_player):
-            player["hero"]["mp"] += 1
-            if player["hero"]["mp"] > player["hero"]["maxmp"]:
-                player["hero"]["mp"] = player["hero"]["maxmp"]
+            player["rogue"]["mp"] += 1
+            if player["rogue"]["mp"] > player["rogue"]["maxmp"]:
+                player["rogue"]["mp"] = player["rogue"]["maxmp"]
                 break
 
             mp_stars(player)
@@ -367,9 +492,9 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
     
     if damage_player != 0: #HP going down animation
         for _ in range(damage_player):
-            player["hero"]["hp"] -= 1
-            if player["hero"]["hp"] < 0:
-                player["hero"]["hp"] = 0
+            player["rogue"]["hp"] -= 1
+            if player["rogue"]["hp"] < 0:
+                player["rogue"]["hp"] = 0
                 break
 
             hp_bar(player)
@@ -386,7 +511,7 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
 
     if mp_deplete_player != 0: #MP going down animation
         for _ in range(mp_deplete_player):
-            player["hero"]["mp"] -= 1
+            player["rogue"]["mp"] -= 1
 
             mp_stars(player)
 
@@ -450,9 +575,9 @@ def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player
             clear()
             print_frame_2()
             print_frame()
-            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            print_slow(f"{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+            if player["rogue"]["hp"] == player["rogue"]["maxhp"]:
                 print_slow(f"\nRecovered All HP.")
             else:
                 print_slow(f"\nRecovered {heal_hp_player} HP.")
@@ -465,9 +590,9 @@ def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player
             clear()
             print_frame_2()
             print_frame()
-            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            print_slow(f"{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-            if player["hero"]["mp"] == player["hero"]["maxmp"]:
+            if player["rogue"]["mp"] == player["rogue"]["maxmp"]:
                 print_slow(f"\nRecovered All MP.")
             else:
                 print_slow(f"\nRecovered {heal_mp_player} MP.")
@@ -480,13 +605,13 @@ def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player
             clear()
             print_frame_2()
             print_frame()
-            print_slow(f"{player["hero"]["name"]} used {player["other"]["inv"][idx]}!")
+            print_slow(f"{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+            if player["rogue"]["hp"] == player["rogue"]["maxhp"]:
                 print_slow(f"\nRecovered All HP ")
             else:
                 print_slow(f"\nRecovered {heal_hp_player} HP ")
-            if player["hero"]["mp"] == player["hero"]["maxmp"]:
+            if player["rogue"]["mp"] == player["rogue"]["maxmp"]:
                 print_slow(f"and All MP.")
             else:
                 print_slow(f"and {heal_mp_player} MP.")
@@ -498,45 +623,56 @@ def item_effects(idx, choice_item, player, items, heal_hp_player, heal_mp_player
             clear()
             print_frame_2()
             print_frame()
-            print_slow(f"""\n{player["hero"]["name"]} tried to used {player["other"]["inv"][idx]}.
+            print_slow(f"""\n{player["rogue"]["name"]} tried to used {player["other"]["inv"][idx]}.
 But nothing happened.""")
             time.sleep(1)
             
 def level_stats(player): #All stats going up when levelling up
-    print_slow(f"""\n\nYou leveled up!
-HP: {player["hero"]["maxhp"]} --> HP: {player["hero"]["maxhp"]+7}
-MP: {player["hero"]["maxmp"]} --> MP: {player["hero"]["maxmp"]}
-ATK: {player["hero"]["atk"]} --> ATK: {player["hero"]["atk"]+2}
-DEF: {player["hero"]["def"]} --> DEF: {player["hero"]["def"]+1}
-MAGIC: {player["hero"]["magic"]} --> MAGIC: {player["hero"]["magic"]+1}""")
-    player["hero"]["maxhp"] += 7
-    player["hero"]["hp"] = player["hero"]["maxhp"]
-    player["hero"]["mp"] = player["hero"]["maxmp"]
-    player["hero"]["atk"] += 2
-    player["hero"]["def"] += 1
-    player["hero"]["magic"] += 1
+    if player["other"]["lv"] < 99:
+        print_slow(f"""\n\nYou leveled up!
+LV: {player["other"]["lv"]} --> LV: {player["other"]["lv"]+1}
+HP: {player["rogue"]["maxhp"]} --> HP: {player["rogue"]["maxhp"]+7}
+MP: {player["rogue"]["maxmp"]} --> MP: {player["rogue"]["maxmp"]+2}
+ATK: {player["rogue"]["atk"]} --> ATK: {player["rogue"]["atk"]+2}
+DEF: {player["rogue"]["def"]} --> DEF: {player["rogue"]["def"]+1}
+MAGIC: {player["rogue"]["magic"]} --> MAGIC: {player["rogue"]["magic"]+1}""")
+        player["other"]["lv"] += 1
+        player["rogue"]["maxhp"] += 7
+        player["rogue"]["hp"] = player["rogue"]["maxhp"]
+        player["rogue"]["maxmp"] += 2
+        player["rogue"]["mp"] = player["rogue"]["maxmp"]
+        player["rogue"]["atk"] += 2
+        player["rogue"]["def"] += 1
+        player["rogue"]["magic"] += 1
+        player["other"]["next_lv"] += 10+(3*player["other"]["lv"])
+    if player["other"]["lv"] == 99:
+        print_slow(f"""\n\nYou leveled up!
+LV: {player["other"]["lv"]} --> LV: {player["other"]["lv"]+1}
+HP: {player["rogue"]["maxhp"]} --> HP: 999
+MP: {player["rogue"]["maxmp"]} --> MP: {player["rogue"]["maxmp"]+2}
+ATK: {player["rogue"]["atk"]} --> ATK: {player["rogue"]["atk"]+2}
+DEF: {player["rogue"]["def"]} --> DEF: {player["rogue"]["def"]+1}
+MAGIC: {player["rogue"]["magic"]} --> MAGIC: {player["rogue"]["magic"]+1}""")
+        player["other"]["lv"] += 1
+        player["rogue"]["maxhp"] = 999
+        player["rogue"]["hp"] = player["rogue"]["maxhp"]
+        player["rogue"]["maxmp"] += 2
+        player["rogue"]["mp"] = player["rogue"]["maxmp"]
+        player["rogue"]["atk"] += 2
+        player["rogue"]["def"] += 1
+        player["rogue"]["magic"] += 1
+        player["other"]["next_lv"] += 9999999999999999999999999
 
-def level_system(player): #The entire levelling system for all levels
-    if player["other"]["xp"] >= 10 and player["other"]["xp"] < 30: #LEVEL 2
-        level_stats()
-        player["other"]["next_lv"] += 20
-    elif player["other"]["xp"] >= 30 and player["other"]["xp"] < 50: #LEVEL 3
-        level_stats()
-        player["other"]["next_lv"] += 40
-    elif player["other"]["xp"] >= 70 and player["other"]["xp"] < 120: #LEVEL 4
-        level_stats()
-        player["other"]["next_lv"] += 50
-    elif player["other"]["xp"] >= 120 and player["other"]["xp"] < 200: #LEVEL 5
-        level_stats()
-        player["other"]["next_lv"] += 80
-    elif player["other"]["xp"] >= 200 and player["other"]["xp"] < 999999999999: #LEVEL 6
-        level_stats()
-        player["other"]["next_lv"] += 999999999999 #THIS IS BECAUSE THIS IS MAX SO FAR
+def level_system(player, level_stats): #The entire levelling system for all levels
+    while player["other"]["next_lv"] <= 0:
+        if player["other"]["lv"] == 100:
+            break
+        level_stats(player)
 
 def hp_bar(player): #HP bar generation
     max_bars = 20
-    hp = max(player["hero"]["hp"], 0)
-    maxhp = player["hero"]["maxhp"]
+    hp = max(player["rogue"]["hp"], 0)
+    maxhp = player["rogue"]["maxhp"]
 
     percent = hp / maxhp
     if percent < 1 and percent > 0.94:
@@ -564,21 +700,30 @@ def hp_bar_enemy(enemies): #HP bar generation for the Enemy
     enemies["enemy"]["hp_bar"] = bar
 
 def mp_stars(player): #MP stars generation
-    if player["hero"]["maxmp"] != 0:
-        player["other"]["mp_stars"] = "*" * player["hero"]["mp"]
-    else:
-        player["other"]["mp_stars"] = "LOCKED"
+    max_bars = 20
+    mp = max(player["rogue"]["mp"], 0)
+    maxmp = player["rogue"]["maxmp"]
 
-def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice): #The entire battle system
+    percent = mp / maxmp
+    if percent < 1 and percent > 0.94:
+        percent = 0.95
+    elif percent <= 0.05 and percent > 0:
+        percent = 0.05
+    filled_bars = round(percent * max_bars)
+
+    bar = "*" * filled_bars + " " * (max_bars - filled_bars)
+    player["other"]["mp_stars"] = bar
+
+def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx): #The entire battle system
     while True:
         while True:
             if defend_player == True:
                 defend_player = False
-                player["hero"]["def"] /= 1.5
-                if player["hero"]["def"] % 1 == 0:
-                    player["hero"]["def"] = int(player["hero"]["def"])
+                player["rogue"]["def"] /= 1.5
+                if player["rogue"]["def"] % 1 == 0:
+                    player["rogue"]["def"] = int(player["rogue"]["def"])
                 else:
-                    player["hero"]["def"] = round(player["hero"]["def"])
+                    player["rogue"]["def"] = round(player["rogue"]["def"])
             clear()
             print_frame_2()
             print_frame()
@@ -590,13 +735,13 @@ def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp
                 clear()
                 print_frame_2()
                 print_frame()
-                print_slow(f"{player["hero"]["name"]} attacks!")
+                print_slow(f"{player["rogue"]["name"]} attacks!")
                 if random.randint(1,100) > 5:
                     if random.randint(1,100) <= 15:
                         print_slow(" CRITICAL HIT!!")
-                        damage_enemy = (player["hero"]["atk"] - (enemies["enemy"]["def"]/2)) * 1.5
+                        damage_enemy = (player["rogue"]["atk"] - (enemies["enemy"]["def"]/2)) * 1.5
                     else:
-                        damage_enemy = player["hero"]["atk"] - (enemies["enemy"]["def"]/2)
+                        damage_enemy = player["rogue"]["atk"] - (enemies["enemy"]["def"]/2)
                     if damage_enemy % 1 == 0:
                         damage_enemy = int(damage_enemy)
                     else:
@@ -619,14 +764,14 @@ def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp
                 print(f"""
  ____________________________________
 ¦
-¦ 1: [{player["hero"]["spells"][0]}] Cost: [{spells[player["hero"]["spells"][0]]["cost"]} MP]
-¦ 2: [{player["hero"]["spells"][1]}] Cost: [{spells[player["hero"]["spells"][1]]["cost"]} MP]
-¦ 3: [{player["hero"]["spells"][2]}] Cost: [{spells[player["hero"]["spells"][2]]["cost"]} MP]
-¦ 4: [{player["hero"]["spells"][3]}] Cost: [{spells[player["hero"]["spells"][3]]["cost"]} MP]
-¦ 5: [{player["hero"]["spells"][4]}] Cost: [{spells[player["hero"]["spells"][4]]["cost"]} MP]
-¦ 6: [{player["hero"]["spells"][5]}] Cost: [{spells[player["hero"]["spells"][5]]["cost"]} MP]
-¦ 7: [{player["hero"]["spells"][6]}] Cost: [{spells[player["hero"]["spells"][6]]["cost"]} MP]
-¦ 8: [{player["hero"]["spells"][7]}] Cost: [{spells[player["hero"]["spells"][7]]["cost"]} MP]
+¦ 1: [{player["rogue"]["spells"][0]}] Cost: [{spells[player["rogue"]["spells"][0]]["cost"]} MP]
+¦ 2: [{player["rogue"]["spells"][1]}] Cost: [{spells[player["rogue"]["spells"][1]]["cost"]} MP]
+¦ 3: [{player["rogue"]["spells"][2]}] Cost: [{spells[player["rogue"]["spells"][2]]["cost"]} MP]
+¦ 4: [{player["rogue"]["spells"][3]}] Cost: [{spells[player["rogue"]["spells"][3]]["cost"]} MP]
+¦ 5: [{player["rogue"]["spells"][4]}] Cost: [{spells[player["rogue"]["spells"][4]]["cost"]} MP]
+¦ 6: [{player["rogue"]["spells"][5]}] Cost: [{spells[player["rogue"]["spells"][5]]["cost"]} MP]
+¦ 7: [{player["rogue"]["spells"][6]}] Cost: [{spells[player["rogue"]["spells"][6]]["cost"]} MP]
+¦ 8: [{player["rogue"]["spells"][7]}] Cost: [{spells[player["rogue"]["spells"][7]]["cost"]} MP]
 ¦____________________________________
 
 What spell will you use?
@@ -641,55 +786,55 @@ Press enter to go back.""")
                     time.sleep(1)
                     clear()
                     continue
-                if player["hero"]["spells"][idx] != "---":
-                    if player["hero"]["mp"] - spells[player["hero"]["spells"][idx]]["cost"] >= 0:
-                        if spells[player["hero"]["spells"][idx]]["type"] == "Heal":
-                            heal_hp_player = player["hero"]["maxhp"] * spells[player["hero"]["spells"][idx]]["multiplier"]
+                if player["rogue"]["spells"][idx] != "---":
+                    if player["rogue"]["mp"] - spells[player["rogue"]["spells"][idx]]["cost"] >= 0:
+                        if spells[player["rogue"]["spells"][idx]]["type"] == "Heal":
+                            heal_hp_player = player["rogue"]["maxhp"] * spells[player["rogue"]["spells"][idx]]["multiplier"]
                             if heal_hp_player % 1 == 0:
                                 heal_hp_player = int(heal_hp_player)
                             else:
                                 heal_hp_player = round(heal_hp_player)
-                            mp_deplete_player = spells[player["hero"]["spells"][idx]]["cost"]
+                            mp_deplete_player = spells[player["rogue"]["spells"][idx]]["cost"]
                             clear()
                             print_frame_2()
                             print_frame()
-                            print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
+                            print_slow(f"{player["rogue"]["name"]} casted {player["rogue"]["spells"][idx]}!")
                             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
-                            if player["hero"]["hp"] == player["hero"]["maxhp"]:
+                            if player["rogue"]["hp"] == player["rogue"]["maxhp"]:
                                 print_slow(f"\nRecovered All HP.")
                             else:
                                 print_slow(f"\nRecovered {heal_hp_player} HP.")
                             heal_hp_player = mp_deplete_player = 0
                             time.sleep(1)
                             break
-                        elif spells[player["hero"]["spells"][idx]]["type"] == "Damage":
-                            damage_enemy = (player["hero"]["magic"] * spells[player["hero"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
+                        elif spells[player["rogue"]["spells"][idx]]["type"] == "Damage":
+                            damage_enemy = (player["rogue"]["magic"] * spells[player["rogue"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
                             if damage_enemy % 1 == 0:
                                 damage_enemy = int(damage_enemy)
                             else:
                                 damage_enemy = round(damage_enemy)
-                            mp_deplete_player = spells[player["hero"]["spells"][idx]]["cost"]
+                            mp_deplete_player = spells[player["rogue"]["spells"][idx]]["cost"]
                             clear()
                             print_frame_2()
                             print_frame()
-                            print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
+                            print_slow(f"{player["rogue"]["name"]} casted {player["rogue"]["spells"][idx]}!")
                             enemy_animation(heal_hp_enemy, damage_enemy)
                             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                             print_slow(f"\nDealt {damage_enemy} damage.")
                             damage_enemy = mp_deplete_player = 0
                             time.sleep(1)
                             break
-                        elif spells[player["hero"]["spells"][idx]]["type"] == "Half":
+                        elif spells[player["rogue"]["spells"][idx]]["type"] == "Half":
                             damage_enemy = enemies["enemy"]["hp"] / 2
                             if damage_enemy % 1 == 0:
                                 damage_enemy = int(damage_enemy)
                             else:
                                 damage_enemy = round(damage_enemy)
-                            mp_deplete_player = spells[player["hero"]["spells"][idx]]["cost"]
+                            mp_deplete_player = spells[player["rogue"]["spells"][idx]]["cost"]
                             clear()
                             print_frame_2()
                             print_frame()
-                            print_slow(f"{player["hero"]["name"]} casted {player["hero"]["spells"][idx]}!")
+                            print_slow(f"{player["rogue"]["name"]} casted {player["rogue"]["spells"][idx]}!")
                             enemy_animation(heal_hp_enemy, damage_enemy)
                             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                             print_slow(f"\nDealt {damage_enemy} damage.")
@@ -733,6 +878,11 @@ Press enter to go back.""")
                     time.sleep(1)
                     clear()
                     continue
+                if idx < 0 or idx >= len(player["other"]["inv"]):
+                    print_slow("\nInvalid choice. Please select again.")
+                    time.sleep(1)
+                    clear()
+                    continue
                 if player["other"]["inv"][idx] == "---":
                     print_slow("\nThere is no item in that slot.")
                     time.sleep(1)
@@ -746,12 +896,12 @@ Press enter to go back.""")
                 print_frame_2()
                 print_frame()
                 defend_player = True
-                player["hero"]["def"] *= 1.5
-                if player["hero"]["def"] % 1 == 0:
-                    player["hero"]["def"] = int(player["hero"]["def"])
+                player["rogue"]["def"] *= 1.5
+                if player["rogue"]["def"] % 1 == 0:
+                    player["rogue"]["def"] = int(player["rogue"]["def"])
                 else:
-                    player["hero"]["def"] = round(player["hero"]["def"])
-                print_slow(f"{player["hero"]["name"]} defended.")
+                    player["rogue"]["def"] = round(player["rogue"]["def"])
+                print_slow(f"{player["rogue"]["name"]} defended.")
                 time.sleep(1)
                 break
 
@@ -760,7 +910,7 @@ Press enter to go back.""")
                 clear()
                 print_frame_2()
                 print_frame()
-                print_slow(f"{player["hero"]["name"]} tried to run")
+                print_slow(f"{player["rogue"]["name"]} tried to run")
                 print_slow2("...")
                 if random.randint(1,100) >= 75:
                     run = True
@@ -786,13 +936,13 @@ Press enter to go back.""")
                 clear()
                 print_frame_2()
                 print_frame()
-                print_slow(f"{enemies[1]["name"]} attacks!")
+                print_slow(f"{enemies["enemy"]["name"]} attacks!")
                 if random.randint(1,100) > 5:
                     if random.randint(1,100) <= 15:
                         print_slow(" CRITICAL HIT!!")
-                        damage_player = (enemies[1]["atk"] - (player["hero"]["def"]/2)) * 1.5
+                        damage_player = (enemies["enemy"]["atk"] - (player["rogue"]["def"]/2)) * 1.5
                     else:
-                        damage_player = enemies[1]["atk"] - (player["hero"]["def"]/2)
+                        damage_player = enemies["enemy"]["atk"] - (player["rogue"]["def"]/2)
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
                     else:
@@ -830,7 +980,7 @@ Press enter to go back.""")
                     heal_hp_enemy = 0
                     time.sleep(1)
                 elif spells[enemies["enemy"]["spells"]]["type"] == "Damage":
-                    damage_player = (enemies["enemy"]["magic"] * spells[player["hero"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
+                    damage_player = (enemies["enemy"]["magic"] * spells[player["rogue"]["spells"][idx]]["multiplier"]) - (enemies["enemy"]["magic"] * 0.75)
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
                     else:
@@ -844,7 +994,7 @@ Press enter to go back.""")
                     damage_player = 0
                     time.sleep(1)
                 elif spells[enemies["enemy"]["spells"]]["type"] == "Half":
-                    damage_player = player["hero"]["hp"] / 2
+                    damage_player = player["rogue"]["hp"] / 2
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
                     else:
@@ -868,13 +1018,15 @@ Press enter to go back.""")
             print_frame()
             
             print_slow(f"""YOU WIN!
-You got {enemies["enemy"]["xp_given"]} XP!""")
+You got {enemies["enemy"]["xp_given"]} XP and {enemies["enemy"]["gold_given"]} GOLD!""")
             player["other"]["xp"] += enemies["enemy"]["xp_given"]
+            player["other"]["gold"] += enemies["enemy"]["gold_given"]
             player["other"]["next_lv"] -= enemies["enemy"]["xp_given"]
+            level_system(player, level_stats)
             time.sleep(2)
             break
-        elif player["hero"]["hp"] == 0:
-            print_slow(f"\n{player["hero"]["name"]} took mortal damage and died.")
+        elif player["rogue"]["hp"] == 0:
+            print_slow(f"\n{player["rogue"]["name"]} took mortal damage and died.")
             time.sleep(1)
             clear()
             print_ascii("ascii/game_over.txt")
@@ -882,17 +1034,17 @@ You got {enemies["enemy"]["xp_given"]} XP!""")
             sys.exit(0)
 
 player = { #All Player info
-    "hero": { #All Hero info
+    "rogue": { #All ROGUE info
         "name":
-            "HERO",
+            "ROGUE",
         "hp":
-            50,
+            1,
         "maxhp":
             50,
         "mp":
-            5,
+            15,
         "maxmp":
-            5,
+            15,
         "atk":
             5,
         "def":
@@ -900,13 +1052,13 @@ player = { #All Player info
         "magic":
             4,
         "spells":
-            ["Heal","Fireball","Split","---","---","---","---","---"]
+            ["Heal+5","Fireball","Split","---","---","---","---","---"]
     },
     "other": { #Other stats
         "weapon":
-            "Basic Short Sword",
+            "Rusty Sword",
         "shield":
-            "Basic Shield",
+            "Wooden Board",
         "acc_1":
             "None",
         "acc_2":
@@ -936,7 +1088,7 @@ player = { #All Player info
         "gold":
             0,
         "inv":
-            ["Jelly Juice","Green Tea","Golden Juice","---","---","---","---","---"],
+            ["Golden Juice","Golden Juice","Golden Juice","Bomb","Bomb","Bomb","Bomb","---"],
         "ascii":
             load_ascii("ascii/player.txt")
     }
@@ -963,13 +1115,39 @@ enemies = { #All enemy info
         "spells":
             "None",
         "xp_given":
-            1,
+            5,
         "gold_given":
             1,
         "ascii":
             load_ascii("ascii/slime.txt")
     },
-    2: { #All Bat info
+    2: { #All Dimensional Beast info
+        "name":
+            "Dimensional Beast",
+        "hp":
+            100,
+        "maxhp":
+            100,
+        "mp":
+            0,
+        "maxmp":
+            0,
+        "atk":
+            35,
+        "def":
+            0,
+        "magic":
+            5,
+        "spells":
+            "None",
+        "xp_given":
+            100,
+        "gold_given":
+            1,
+        "ascii":
+            load_ascii("ascii/d_beast.txt")
+    },
+    3: { #All Bat info
         "name":
             "Bat",
         "hp":
@@ -1036,23 +1214,63 @@ spells = { #All Spell info
     },
     "Heal": { #All Heal info
         "cost":
-            1,
+            5,
+        "type":
+            "Heal",
+        "multiplier":
+            0.25
+    },
+    "Heal+1": { #All Heal+1 info
+        "cost":
+            15,
         "type":
             "Heal",
         "multiplier":
             0.33
     },
+    "Heal+2": { #All Heal+1 info
+        "cost":
+            15,
+        "type":
+            "Heal",
+        "multiplier":
+            0.5
+    },
+    "Heal+3": { #All Heal+1 info
+        "cost":
+            15,
+        "type":
+            "Heal",
+        "multiplier":
+            0.65
+    },
+    "Heal+4": { #All Heal+1 info
+        "cost":
+            15,
+        "type":
+            "Heal",
+        "multiplier":
+            0.75
+    },
+    "Heal+5": { #All Heal+1 info
+        "cost":
+            15,
+        "type":
+            "Heal",
+        "multiplier":
+            1
+    },
     "Fireball": { #All Fireball info
         "cost":
-            2,
+            7,
         "type":
             "Damage",
         "multiplier":
-            2
+            3
     },
     "Split": { #All Drain info
         "cost":
-            5,
+            20,
         "type":
             "Half",
         "multiplier":
@@ -1093,6 +1311,7 @@ items = { #All Item info
     }
 }
 
+idx = 0
 damage_player = 0
 mp_deplete_player = 0
 heal_hp_player = 0
@@ -1107,7 +1326,7 @@ run = False
 enemy_choice = 0
 e_num = 0
 
-current_map = "r_1"
+current_map = "o_1"
 game_map = MAPS[current_map]
-player_r, player_c = 7, 19
+player_r, player_c = 10, 17
 main()
