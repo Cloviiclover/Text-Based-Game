@@ -42,11 +42,11 @@ MAPS = { #All maps/rooms in the game
         "###################################",
     ],
     "o_2": [
-        "####TTTTTTTTT####",
-        "#..#TTT.N.TTT#..#",
-        "#..#####.#####..#",
-        "#...............#",
         "######## ########",
+        "#...............#",
+        "#.######N######.#",
+        "#.#...........#.#",
+        "###TTTTTTTTTTT###",
     ],
     "r_1": [
         "### ####################",
@@ -157,8 +157,8 @@ MAPS = { #All maps/rooms in the game
 }
 
 WARPS = {
-    ("o_1", 16, 17): ("o_2", 3, 8),
-    ("o_2", 4, 8): ("o_1", 15, 17),
+    ("o_1", 16, 17): ("o_2", 1, 8),
+    ("o_2", 0, 8): ("o_1", 15, 17),
     ("o_1", 0, 17): ("r_1", 7, 19),
     ("r_1", 8, 19): ("o_1", 1, 17),
     ("r_1", 0, 3): ("r_2", 7, 3),
@@ -215,6 +215,13 @@ def interact_at(game_map, r,c, messages):
                 game_map[r][c] = "."
             else:
                 messages.append("You don't have any space.")
+        elif current_map == "o_2":
+            if "---" in player["other"]["inv"]:
+                messages.append("You found a treasure!")
+                player["other"]["inv"][player["other"]["inv"].index("---")] = "Escape Orb"
+                game_map[r][c] = "."
+            else:
+                messages.append("You don't have any space.")
         elif current_map == "r_2":
             if "---" in player["other"]["inv"]:
                 messages.append("You found a treasure!")
@@ -264,6 +271,7 @@ def interact_at(game_map, r,c, messages):
 ¦ 4: [Escape Orb] [15G]
 ¦
 ¦ SELL: Sell items you have for GOLD
+¦ STEAL: Steal an item
 ¦____________________________________
 
 What item will you buy?
@@ -332,6 +340,84 @@ Press enter to go back.""")
                             print_slow("\nYou don't have enough GOLD.")
                             time.sleep(1)
                             continue
+                    elif choice_shop.lower() == "steal":
+                        if steal_player == 0:
+                            print_slow("Hey! No stealing allowed.")
+                            time.sleep(1)
+                            steal_player += 1
+                        elif steal_player == 1:
+                            print_slow("I'm being serious... No stealing allowed!")
+                            time.sleep(1)
+                            steal_player += 1
+                        elif steal_player == 2:
+                            print_slow("Fine try and steal and you'll be punished")
+                            time.sleep(1)
+                            steal_player += 1
+                        elif steal_player == 3:
+                            clear()
+                            print(f"""...
+ ____________________________________
+¦
+¦ GOLD: {player["other"]["gold"]}G
+¦
+¦ 1: [Jelly Juice] [STEAL]
+¦ 2: [Green Tea] [STEAL]
+¦ 3: [Bomb] [STEAL]
+¦ 4: [Escape Orb] [STEAL]
+¦____________________________________
+
+What item will you buy?
+Press enter to go back.""")
+                        choice_steal = input("\n--> ")
+                            if choice_shop.strip() == "":
+                                break
+                            try:
+                                if choice_shop == "1":
+                                    if "---" in player["other"]["inv"]:
+                                        print_slow("\nYou bought Jelly Juice!")
+                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Jelly Juice"
+                                        time.sleep(1)
+                                    else:
+                                        print_slow("\nYou don't have any space.")
+                                        time.sleep(1)
+                                        continue
+                                elif choice_shop == "2":
+                                    if "---" in player["other"]["inv"]:
+                                        print_slow("\nYou bought Green Tea!")
+                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Green Tea"
+                                        time.sleep(1)
+                                    else:
+                                        print_slow("\nYou don't have any space.")
+                                        time.sleep(1)
+                                        continue
+                                elif choice_shop == "3":
+                                    if "---" in player["other"]["inv"]:
+                                        print_slow("\nYou bought Bomb!")
+                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
+                                        time.sleep(1)
+                                    else:
+                                        print_slow("\nYou don't have any space.")
+                                        time.sleep(1)
+                                        continue
+                                else:
+                                    print_slow("\nYou don't have enough GOLD.")
+                                    time.sleep(1)
+                                    continue
+                            elif choice_shop == "4":
+                                if player["other"]["gold"] >= 15:
+                                    if "---" in player["other"]["inv"]:
+                                        print_slow("\nYou bought Escape Orb!")
+                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Escape Orb"
+                                        player["other"]["gold"] -= 15
+                                        time.sleep(1)
+                                    else:
+                                        print_slow("\nYou don't have any space.")
+                                        time.sleep(1)
+                                        continue
+                                else:
+                                    print_slow("\nYou don't have enough GOLD.")
+                                    time.sleep(1)
+                                    continue
                     elif choice_shop.lower() == "sell":
                         clear()
                         print(f"""Sure I'll buy stuff from you!
@@ -394,8 +480,8 @@ Press enter to go back.""")
             messages.append("and never come back.'")
         elif current_map == "r_7":
             messages.append("NPC: 'I don't need this anymore. Take it!'")
-            player["other"]["key_inv"][player["other"]["key_inv"].index("---")] = "Dimensional Key"
-            messages.append("You got the Dimensional Key!")
+            player["other"]["key_inv"][player["other"]["key_inv"].index("---")] = "Leader's Key"
+            messages.append("You got the Leader's Key!")
     elif ch == "/":
         messages.append("A cracked wall. Seems breakable...")
         if "Bomb" in player["other"]["inv"]:
@@ -411,8 +497,8 @@ Press enter to go back.""")
                 messages.append("You decided to ignore it.")
     elif ch == "D":
         messages.append("A locked door. Needs some kind of key.")
-        if "Dimensional Key" in player["other"]["key_inv"]:
-            messages.append("Use Dimensional Key? [Y/N]")
+        if "Leader's Key" in player["other"]["key_inv"]:
+            messages.append("Use Leader's Key? [Y/N]")
             draw(game_map, (player_r, player_c), messages)
             choice_map = input("--> ")
             if choice_map.lower() == "y":
@@ -444,8 +530,9 @@ Press enter to go back.""")
             enemies["enemy"]["gold_given"] = enemies[2]["gold_given"]
             enemies["enemy"]["ascii"] = enemies[2]["ascii"]
             hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
-            battle(mp_recovery, player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
-            mp_recovery = 0
+            battle(charge_player, charge_enemy, player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
+            charge_player = False
+            charge_enemy = False
         if enemies["enemy"]["hp"] <= 0:
             game_map[r][c] = "."
         
@@ -1335,16 +1422,6 @@ You got {enemies["enemy"]["xp_given"]} XP and {enemies["enemy"]["gold_given"]} G
             print_ascii("ascii/game_over.txt")
             time.sleep(5)
             sys.exit(0)
-        if choice == "1" or choice == "4":
-            mp_recovery += 1
-        if mp_recovery == 2:
-            mp_recovery = 0
-            player["rogue"]["mp"] += 10
-            if player["rogue"]["mp"] > player["rogue"]["maxmp"]:
-                player["rogue"]["mp"] = player["rogue"]["maxmp"]
-                print_slow("\nRecovered All MP")
-            else:
-                print_slow("\nRecovered 10 MP")
 
 player = { #All Player info
     "rogue": { #All ROGUE info
@@ -1403,7 +1480,7 @@ player = { #All Player info
         "inv":
             ["---","---","---","---","---","---","---","---"],
         "key_inv":
-            ["Dimensional Key","---","---","---","---","---","---","---"],
+            ["---","---","---","---","---","---","---","---"],
         "ascii":
             load_ascii("ascii/player.txt")
     }
@@ -1416,7 +1493,7 @@ enemies = { #All enemy info
         "hp":
             10,
         "maxhp":
-            15,
+            10,
         "mp":
             0,
         "maxmp":
@@ -1654,13 +1731,13 @@ items = { #All Item info
         "sell":
             8
     },
-    "Dimensional Key": { #All Dimensional Key info
+    "Leader's Key": { #All Leader's Key info
         "recovery":
             0,
         "type":
             "Other",
         "info":
-            "Dimensional Key: Opens Dimensional locked doors.",
+            "Leader's Key: Opens locked doors.",
         "sell":
             0
     }
@@ -1680,7 +1757,8 @@ run = False
 enemy_choice = 0
 e_num = 0
 idx = 0
-mp_recovery = 0
+charge_player = False
+charge_enemy = False
 
 current_map = "o_1"
 game_map = MAPS[current_map]
