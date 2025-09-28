@@ -44,6 +44,7 @@ MAPS = { #All maps/rooms in the game
     "o_2": [
         "######## ########",
         "#...............#",
+        "#...............#",
         "#.######N######.#",
         "#.#...........#.#",
         "###TTTTTTTTTTT###",
@@ -113,7 +114,7 @@ MAPS = { #All maps/rooms in the game
     "r_7": [
         "########### ############",
         "#......................#",
-        "#.......N..............D",
+        "#.......N.............. ",
         "#......................#",
         "###########B############",
         "#......................#",
@@ -205,7 +206,8 @@ def can_move(game_map, r,c):
         return False
     return game_map[r][c] in ("."," ")#Walkable tiles
 
-def interact_at(game_map, r,c, messages):
+def interact_at(game_map, r,c, messages, steal_player):
+    global stolen
     ch = game_map[r][c]
     if ch == "T":
         if current_map == "o_1":
@@ -342,17 +344,23 @@ Press enter to go back.""")
                             continue
                     elif choice_shop.lower() == "steal":
                         if steal_player == 0:
-                            print_slow("Hey! No stealing allowed.")
-                            time.sleep(1)
+                            print_slow("\nHey! No stealing allowed.")
                             steal_player += 1
+                            time.sleep(1)
+                            clear()
+                            continue
                         elif steal_player == 1:
-                            print_slow("I'm being serious... No stealing allowed!")
-                            time.sleep(1)
+                            print_slow("\nI'm being serious... No stealing allowed!")
                             steal_player += 1
+                            time.sleep(1)
+                            clear()
+                            continue
                         elif steal_player == 2:
-                            print_slow("Fine try and steal and you'll be punished")
-                            time.sleep(1)
+                            print_slow("\nFine! Try and steal and you'll be punished.")
                             steal_player += 1
+                            time.sleep(1)
+                            clear()
+                            continue
                         elif steal_player == 3:
                             clear()
                             print(f"""...
@@ -366,58 +374,57 @@ Press enter to go back.""")
 ¦ 4: [Escape Orb] [STEAL]
 ¦____________________________________
 
-What item will you buy?
+What item will you steal?
 Press enter to go back.""")
                         choice_steal = input("\n--> ")
-                            if choice_shop.strip() == "":
-                                break
-                            try:
-                                if choice_shop == "1":
-                                    if "---" in player["other"]["inv"]:
-                                        print_slow("\nYou bought Jelly Juice!")
-                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Jelly Juice"
-                                        time.sleep(1)
-                                    else:
-                                        print_slow("\nYou don't have any space.")
-                                        time.sleep(1)
-                                        continue
-                                elif choice_shop == "2":
-                                    if "---" in player["other"]["inv"]:
-                                        print_slow("\nYou bought Green Tea!")
-                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Green Tea"
-                                        time.sleep(1)
-                                    else:
-                                        print_slow("\nYou don't have any space.")
-                                        time.sleep(1)
-                                        continue
-                                elif choice_shop == "3":
-                                    if "---" in player["other"]["inv"]:
-                                        print_slow("\nYou bought Bomb!")
-                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
-                                        time.sleep(1)
-                                    else:
-                                        print_slow("\nYou don't have any space.")
-                                        time.sleep(1)
-                                        continue
+                        if choice_steal.strip() == "":
+                            break
+                        try:
+                            if choice_steal == "1":
+                                if "---" in player["other"]["inv"]:
+                                    print_slow("\nYou stole Jelly Juice!")
+                                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Jelly Juice"
+                                    stolen = True
+                                    time.sleep(1)
                                 else:
-                                    print_slow("\nYou don't have enough GOLD.")
+                                    print_slow("\nYou don't have any space.")
                                     time.sleep(1)
                                     continue
-                            elif choice_shop == "4":
-                                if player["other"]["gold"] >= 15:
-                                    if "---" in player["other"]["inv"]:
-                                        print_slow("\nYou bought Escape Orb!")
-                                        player["other"]["inv"][player["other"]["inv"].index("---")] = "Escape Orb"
-                                        player["other"]["gold"] -= 15
-                                        time.sleep(1)
-                                    else:
-                                        print_slow("\nYou don't have any space.")
-                                        time.sleep(1)
-                                        continue
+                            elif choice_steal == "2":
+                                if "---" in player["other"]["inv"]:
+                                    print_slow("\nYou stole Green Tea!")
+                                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Green Tea"
+                                    stolen = True
+                                    time.sleep(1)
                                 else:
-                                    print_slow("\nYou don't have enough GOLD.")
+                                    print_slow("\nYou don't have any space.")
                                     time.sleep(1)
                                     continue
+                            elif choice_steal == "3":
+                                if "---" in player["other"]["inv"]:
+                                    print_slow("\nYou stole Bomb!")
+                                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Bomb"
+                                    stolen = True
+                                    time.sleep(1)
+                                else:
+                                    print_slow("\nYou don't have any space.")
+                                    time.sleep(1)
+                                    continue
+                            elif choice_steal == "4":
+                                if "---" in player["other"]["inv"]:
+                                    print_slow("\nYou stole Escape Orb!")
+                                    player["other"]["inv"][player["other"]["inv"].index("---")] = "Escape Orb"
+                                    stolen = True
+                                    time.sleep(1)
+                                else:
+                                    print_slow("\nYou don't have any space.")
+                                    time.sleep(1)
+                                    continue
+                        except ValueError:
+                            print_slow("\nInvalid choice. Please select again.")
+                            time.sleep(1)
+                            clear()
+                            continue
                     elif choice_shop.lower() == "sell":
                         clear()
                         print(f"""Sure I'll buy stuff from you!
@@ -479,9 +486,12 @@ Press enter to go back.""")
             messages.append("NPC: 'Many heroes explore the dungeon")
             messages.append("and never come back.'")
         elif current_map == "r_7":
-            messages.append("NPC: 'I don't need this anymore. Take it!'")
-            player["other"]["key_inv"][player["other"]["key_inv"].index("---")] = "Leader's Key"
-            messages.append("You got the Leader's Key!")
+            if "Leader's Key" not in player["other"]["key_inv"]:
+                messages.append("NPC: 'I don't need this anymore. Take it!'")
+                player["other"]["key_inv"][player["other"]["key_inv"].index("---")] = "Leader's Key"
+                messages.append("You got the Leader's Key!")
+            else:
+                messages.append("NPC: 'By the way, do you know how to get out of here?'")
     elif ch == "/":
         messages.append("A cracked wall. Seems breakable...")
         if "Bomb" in player["other"]["inv"]:
@@ -517,27 +527,25 @@ Press enter to go back.""")
             print_slow("\n(!) BATTLE START!")
             time.sleep(3)
             idx = 0
-            enemies["enemy"]["name"] = enemies[2]["name"]
-            enemies["enemy"]["hp"] = enemies[2]["hp"]
-            enemies["enemy"]["maxhp"] = enemies[2]["maxhp"]
-            enemies["enemy"]["mp"] = enemies[2]["mp"]
-            enemies["enemy"]["maxmp"] = enemies[2]["maxmp"]
-            enemies["enemy"]["atk"] = enemies[2]["atk"]
-            enemies["enemy"]["def"] = enemies[2]["def"]
-            enemies["enemy"]["magic"] = enemies[2]["magic"]
-            enemies["enemy"]["spells"] = enemies[2]["spells"]
-            enemies["enemy"]["xp_given"] = enemies[2]["xp_given"]
-            enemies["enemy"]["gold_given"] = enemies[2]["gold_given"]
-            enemies["enemy"]["ascii"] = enemies[2]["ascii"]
+            enemies["enemy"]["name"] = enemies[4]["name"]
+            enemies["enemy"]["hp"] = enemies[4]["hp"]
+            enemies["enemy"]["maxhp"] = enemies[4]["maxhp"]
+            enemies["enemy"]["mp"] = enemies[4]["mp"]
+            enemies["enemy"]["maxmp"] = enemies[4]["maxmp"]
+            enemies["enemy"]["atk"] = enemies[4]["atk"]
+            enemies["enemy"]["def"] = enemies[4]["def"]
+            enemies["enemy"]["magic"] = enemies[4]["magic"]
+            enemies["enemy"]["spells"] = enemies[4]["spells"]
+            enemies["enemy"]["xp_given"] = enemies[4]["xp_given"]
+            enemies["enemy"]["gold_given"] = enemies[4]["gold_given"]
+            enemies["enemy"]["ascii"] = enemies[4]["ascii"]
             hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
-            battle(charge_player, charge_enemy, player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
-            charge_player = False
-            charge_enemy = False
+            battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
         if enemies["enemy"]["hp"] <= 0:
             game_map[r][c] = "."
         
 def overworld():
-    global mp_recovery, current_map, game_map, player_r, player_c, enemies, e_num, hp_bar, mp_stars, hp_bar_enemy, idx, choice_item, player, items, heal_hp_player, heal_mp_player
+    global stolen, current_map, game_map, player_r, player_c, enemies, e_num, hp_bar, mp_stars, hp_bar_enemy, idx, choice_item, player, items, heal_hp_player, heal_mp_player
     messages = ["Use WASD to move, E to interact, Q to use items and check stats."]
 
     while True:
@@ -557,11 +565,11 @@ def overworld():
                     game_map = MAPS[current_map]
                     player_r, player_c = dest_r, dest_c
                     continue
-                if random.randint(1,100) <= 3 and current_map != "o_1" and current_map != "o_2":
+                if random.randint(1,100) <= 2 and current_map != "o_1" and current_map != "o_2":
                     draw(game_map, (player_r, player_c), messages)
                     print_slow("\n(!) BATTLE START!")
                     time.sleep(3)
-                    e_num = random.randint(1,1)
+                    e_num = random.randint(1,3)
                     enemies["enemy"]["name"] = enemies[e_num]["name"]
                     enemies["enemy"]["hp"] = enemies[e_num]["hp"]
                     enemies["enemy"]["maxhp"] = enemies[e_num]["maxhp"]
@@ -575,17 +583,37 @@ def overworld():
                     enemies["enemy"]["gold_given"] = enemies[e_num]["gold_given"]
                     enemies["enemy"]["ascii"] = enemies[e_num]["ascii"]
                     hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
-                    mp_recovery = 0
-                    battle(mp_recovery, player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
+                    battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
+                if player_r == 1 and player_c == 8 and current_map == "o_2" and stolen == True:
+                    messages.append("SHOPKEEPER: 'HEY! GET BACK HERE THIEF!'")
+                    draw(game_map, (player_r, player_c), messages)
+                    time.sleep(2)
+                    print_slow("\n(!) BATTLE START!")
+                    time.sleep(3)
+                    idx = 0
+                    enemies["enemy"]["name"] = enemies[5]["name"]
+                    enemies["enemy"]["hp"] = enemies[5]["hp"]
+                    enemies["enemy"]["maxhp"] = enemies[5]["maxhp"]
+                    enemies["enemy"]["mp"] = enemies[5]["mp"]
+                    enemies["enemy"]["maxmp"] = enemies[5]["maxmp"]
+                    enemies["enemy"]["atk"] = enemies[5]["atk"]
+                    enemies["enemy"]["def"] = enemies[5]["def"]
+                    enemies["enemy"]["magic"] = enemies[5]["magic"]
+                    enemies["enemy"]["spells"] = enemies[5]["spells"]
+                    enemies["enemy"]["xp_given"] = enemies[5]["xp_given"]
+                    enemies["enemy"]["gold_given"] = enemies[5]["gold_given"]
+                    enemies["enemy"]["ascii"] = enemies[5]["ascii"]
+                    hp_bar(player), mp_stars(player), hp_bar_enemy(enemies)
+                    battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items) #The entire battle system
             else:
-                messages.append("You bump into something.")
+                messages.append("You bumped into something.")
         elif choice_map == "e":
             interacted = False
             for dr,dc in [(-1,0),(1,0),(0,-1),(0,1)]:
                 nr, nc = player_r+dr, player_c+dc
                 if 0 <= nr < len(game_map) and 0 <= nc < len(game_map[0]):
                     if game_map[nr][nc] in ("T", "N", "/", "B", "D"):
-                        interact_at(game_map, nr, nc, messages)
+                        interact_at(game_map, nr, nc, messages, steal_player)
                         interacted = True
                         break
             if not interacted:
@@ -716,13 +744,18 @@ Press enter to go back.""")
 But nothing happened.""")
                         time.sleep(1)
                     elif items[player["other"]["inv"][idx]]["type"] == "Escape": #Escape (Teleport to Overworld)
-                        print_slow(f"\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
-                        del player["other"]["inv"][idx]
-                        player["other"]["inv"].append("---")
-                        current_map = "o_1"
-                        game_map = MAPS[current_map]
-                        player_r, player_c = 10, 17
-                        time.sleep(1)
+                        if current_map != "o_2":
+                            print_slow(f"\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!")
+                            del player["other"]["inv"][idx]
+                            player["other"]["inv"].append("---")
+                            current_map = "o_1"
+                            game_map = MAPS[current_map]
+                            player_r, player_c = 10, 17
+                            time.sleep(1)
+                        else:
+                            print_slow(f"""\n{player["rogue"]["name"]} tried to use {player["other"]["inv"][idx]}.
+But the shopkeeper stared at you.""")
+                            time.sleep(1)
             elif choice_item == "2":
                 print_slow(f"\n{items[player["other"]["inv"][idx]]["info"]}")
                 time.sleep(1)
@@ -784,7 +817,7 @@ def print_frame_2(): #Prints Enemy's battle text file
 def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player): #Animation for Player's HP, HP bar, and MP stars
     ascii_lines = player["other"]["ascii"].split("\n")
     num_lines = len(ascii_lines)
-    ascii_lines_2 = enemies[1]["ascii"].split("\n")
+    ascii_lines_2 = enemies["enemy"]["ascii"].split("\n")
     num_lines_2 = len(ascii_lines_2)
     if heal_hp_player != 0: #HP Recovery animation
         for _ in range(heal_hp_player):
@@ -862,7 +895,7 @@ def player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_p
 def enemy_animation(heal_hp_enemy, damage_enemy): #Animation for Enemy's HP bar
     ascii_lines = player["other"]["ascii"].split("\n")
     num_lines = len(ascii_lines)
-    ascii_lines_2 = enemies[1]["ascii"].split("\n")
+    ascii_lines_2 = enemies["enemy"]["ascii"].split("\n")
     num_lines_2 = len(ascii_lines_2)
     if heal_hp_enemy != 0: #HP Recovery animation
         for _ in range(heal_hp_enemy):
@@ -964,8 +997,11 @@ But nothing happened.""")
             clear()
             print_frame_2()
             print_frame()
-            print_slow(f"""\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!
+            if enemies["enemy"]["name"] != "Dimensional Beast" and enemies["enemy"]["name"] != "Shopkeeper":
+                print_slow(f"""\n{player["rogue"]["name"]} used {player["other"]["inv"][idx]}!
 Escaped!""")
+            else:
+                print_slow("You cannot escape.")
             time.sleep(1)
         elif items[player["other"]["inv"][idx]]["type"] == "Explosive": #Explosive
             clear()
@@ -1024,6 +1060,12 @@ def level_system(player, level_stats): #The entire levelling system for all leve
         if player["other"]["lv"] == 2:
             print_slow(f"\n\n{player["rogue"]["name"]} learnt Heal!")
             player["rogue"]["spells"][0] = "Heal"
+        elif player["other"]["lv"] == 4:
+            print_slow(f"\n\n{player["rogue"]["name"]} learnt Fireball!")
+            player["rogue"]["spells"][1] = "Fireball"
+        elif player["other"]["lv"] == 6:
+            print_slow(f"\n\n{player["rogue"]["name"]} learnt Heal+1!")
+            player["rogue"]["spells"][0] = "Heal+1"
 
 def hp_bar(player): #HP bar generation
     max_bars = 20
@@ -1070,49 +1112,31 @@ def mp_stars(player): #MP stars generation
     bar = "*" * filled_bars + " " * (max_bars - filled_bars)
     player["other"]["mp_stars"] = bar
 
-def battle(mp_recovery, player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items): #The entire battle system
+def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp_enemy, mp_deplete_player, spells, defend_player, defend_enemy, run, enemy_choice, level_system, idx, items): #The entire battle system
     while True:
         while True:
-            while True:
-                if len(enemies["enemy"]["spells"]) > 0:
-                    enemy_choice = random.randint(1,3)
-                    break
-                else:
-                    enemy_choice = random.randint(1,2)
-                    break
+            if len(enemies["enemy"]["spells"]) > 0:
+                enemy_choice = random.randint(1,5)
+            else:
+                enemy_choice = random.randint(1,3)
             if defend_player == True:
                 defend_player = False
-                player["rogue"]["def"] /= 1.5
-                if player["rogue"]["def"] % 1 == 0:
-                    player["rogue"]["def"] = int(player["rogue"]["def"])
-                else:
-                    player["rogue"]["def"] = round(player["rogue"]["def"])
             if defend_enemy == True:
                 defend_enemy = False
-                enemies["enemy"]["def"] /= 1.5
-                if enemies["enemy"]["def"] % 1 == 0:
-                    enemies["enemy"]["def"] = int(enemies["enemy"]["def"])
-                else:
-                    enemies["enemy"]["def"] = round(enemies["enemy"]["def"])
             clear()
             print_frame_2()
             print_frame()
             choice = input("""[1: FIGHT] [2: MAGIC] [3: ITEM] [4: DEFEND] [5: RUN]
 
 --> """)
-            if enemy_choice == 2 and choice == "1":
+            if enemy_choice == 3 and choice == "1":
                 clear()
                 print_frame_2()
                 print_frame()
                 defend_enemy = True
-                enemies["enemy"]["def"] *= 1.5
-                if enemies["enemy"]["def"] % 1 == 0:
-                    enemies["enemy"]["def"] = int(enemies["enemy"]["def"])
-                else:
-                    enemies["enemy"]["def"] = round(enemies["enemy"]["def"])
                 print_slow(f"{enemies["enemy"]["name"]} defended.")
                 time.sleep(1)
-            else:
+            if enemy_choice == 3 and choice != "1":
                 enemy_choice = 1
             if choice == "1":
                 #PLAYER TURN [ATTACK]
@@ -1133,6 +1157,12 @@ def battle(mp_recovery, player, enemies, damage_player, damage_enemy, heal_hp_pl
                     damage_enemy += random.randint(-2,4)
                     if damage_enemy <= 0:
                         damage_enemy = 1
+                    if defend_enemy == True:
+                        damage_enemy /= 1.5
+                        if damage_enemy % 1 == 0:
+                            damage_enemy = int(damage_enemy)
+                        else:
+                            damage_enemy = round(damage_enemy)
                     enemy_animation(heal_hp_enemy, damage_enemy)
                     print_slow(f"\nDealt {damage_enemy} damage.")
                     damage_enemy = 0
@@ -1207,6 +1237,12 @@ Press enter to go back.""")
                             print_frame_2()
                             print_frame()
                             print_slow(f"{player["rogue"]["name"]} casted {player["rogue"]["spells"][idx]}!")
+                            if defend_enemy == True:
+                                damage_enemy /= 1.5
+                                if damage_enemy % 1 == 0:
+                                    damage_enemy = int(damage_enemy)
+                                else:
+                                    damage_enemy = round(damage_enemy)
                             enemy_animation(heal_hp_enemy, damage_enemy)
                             player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                             print_slow(f"\nDealt {damage_enemy} damage.")
@@ -1278,10 +1314,13 @@ Press enter to go back.""")
                     continue
                 item_effects(damage_enemy, enemy_animation, idx, choice_item, player, items, heal_hp_player, heal_mp_player)
                 if items[player["other"]["inv"][idx]]["type"] == "Escape": #Escape effect as for some reason it doesn't work in function
-                    del player["other"]["inv"][idx]
-                    player["other"]["inv"].append("---")
-                    run = True
-                break
+                    if enemies["enemy"]["name"] != "Dimensional Beast" and enemies["enemy"]["name"] != "Shopkeeper":
+                        del player["other"]["inv"][idx]
+                        player["other"]["inv"].append("---")
+                        run = True
+                        break
+                    else:
+                        continue
 
             elif choice == "4":
                 #PLAYER TURN [DEFEND]
@@ -1289,11 +1328,6 @@ Press enter to go back.""")
                 print_frame_2()
                 print_frame()
                 defend_player = True
-                player["rogue"]["def"] *= 1.5
-                if player["rogue"]["def"] % 1 == 0:
-                    player["rogue"]["def"] = int(player["rogue"]["def"])
-                else:
-                    player["rogue"]["def"] = round(player["rogue"]["def"])
                 print_slow(f"{player["rogue"]["name"]} defended.")
                 time.sleep(1)
                 break
@@ -1303,17 +1337,22 @@ Press enter to go back.""")
                 clear()
                 print_frame_2()
                 print_frame()
-                print_slow(f"{player["rogue"]["name"]} tried to run")
-                print_slow2("...")
-                if random.randint(1,100) <= 75:
-                    run = True
-                    print_slow("\nAnd did!")
-                    time.sleep(1)
-                    break
+                if enemies["enemy"]["name"] != "Dimensional Beast" and enemies["enemy"]["name"] != "Shopkeeper":
+                    print_slow(f"{player["rogue"]["name"]} tried to run")
+                    print_slow2("...")
+                    if random.randint(1,100) <= 75:
+                        run = True
+                        print_slow("\nAnd did!")
+                        time.sleep(1)
+                        break
+                    else:
+                        print_slow("\nAnd failed!")
+                        time.sleep(1)
+                        break
                 else:
-                    print_slow("\nAnd failed!")
+                    print_slow("You cannot escape.")
                     time.sleep(1)
-                    break
+                    continue
 
         if run == True:
             run = False
@@ -1321,7 +1360,7 @@ Press enter to go back.""")
 
         if enemies["enemy"]["hp"] != 0:
             #ENEMY TURN
-            if enemy_choice == 1:
+            if enemy_choice == 1 or enemy_choice == 2:
                 #ENEMY TURN [FIGHT]
                 clear()
                 print_frame_2()
@@ -1340,6 +1379,12 @@ Press enter to go back.""")
                     damage_player += random.randint(-2,4)
                     if damage_player <= 0:
                         damage_player = 1
+                    if defend_player == True:
+                        damage_player /= 1.5
+                        if damage_player % 1 == 0:
+                            damage_player = int(damage_player)
+                        else:
+                            damage_player = round(damage_player)
                     player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                     print_slow(f"\nDealt {damage_player} damage.")
                     damage_player = 0
@@ -1347,13 +1392,15 @@ Press enter to go back.""")
                 else:
                     print_slow(" Missed!")
                     time.sleep(1)
-            elif enemy_choice == 3:
+            elif enemy_choice == 4 or enemy_choice == 5:
                 #ENEMY TURN [MAGIC]
                 clear()
                 print_frame_2()
                 print_frame()
-                if spells[enemies["enemy"]["spells"]]["type"] == "Heal":
-                    heal_hp_enemy = enemies["enemy"]["maxhp"] * spells[enemies["enemy"]["spells"]]["multiplier"]
+                idx = random.randint(1,len(enemies["enemy"]["spells"]))
+                idx = int(idx) - 1
+                if spells[enemies["enemy"]["spells"][idx]]["type"] == "Heal":
+                    heal_hp_enemy = enemies["enemy"]["maxhp"] * spells[enemies["enemy"]["spells"][idx]]["multiplier"]
                     if heal_hp_enemy % 1 == 0:
                         heal_hp_enemy = int(heal_hp_enemy)
                     else:
@@ -1361,7 +1408,7 @@ Press enter to go back.""")
                     clear()
                     print_frame_2()
                     print_frame()
-                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"][idx]}!")
                     enemy_animation(heal_hp_player, damage_player)
                     if enemies["enemy"]["hp"] == enemies["enemy"]["maxhp"]:
                         print_slow(f"\nRecovered All HP.")
@@ -1369,7 +1416,7 @@ Press enter to go back.""")
                         print_slow(f"\nRecovered {heal_hp_enemy} HP.")
                     heal_hp_enemy = 0
                     time.sleep(1)
-                elif spells[enemies["enemy"]["spells"]]["type"] == "Damage":
+                elif spells[enemies["enemy"]["spells"][idx]]["type"] == "Damage":
                     damage_player = (enemies["enemy"]["magic"] * spells[enemies["enemy"]["spells"][idx]]["multiplier"]) - (player["rogue"]["magic"] * 0.75)
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
@@ -1378,12 +1425,18 @@ Press enter to go back.""")
                     clear()
                     print_frame_2()
                     print_frame()
-                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"][idx]}!")
+                    if defend_player == True:
+                        damage_player /= 1.5
+                        if damage_player % 1 == 0:
+                            damage_player = int(damage_player)
+                        else:
+                            damage_player = round(damage_player)
                     player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                     print_slow(f"\nDealt {damage_player} damage.")
                     damage_player = 0
                     time.sleep(1)
-                elif spells[enemies["enemy"]["spells"]]["type"] == "Half":
+                elif spells[enemies["enemy"]["spells"][idx]]["type"] == "Half":
                     damage_player = player["rogue"]["hp"] / 2
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
@@ -1392,7 +1445,7 @@ Press enter to go back.""")
                     clear()
                     print_frame_2()
                     print_frame()
-                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"]}!")
+                    print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"][idx]}!")
                     player_animation(heal_hp_player, heal_mp_player, damage_player, mp_deplete_player)
                     print_slow(f"\nDealt {damage_player} damage.")
                     damage_player = 0
@@ -1507,13 +1560,65 @@ enemies = { #All enemy info
         "spells":
             [],
         "xp_given":
-            3,
+            5,
         "gold_given":
             5,
         "ascii":
             load_ascii("ascii/slime.txt")
     },
-    2: { #All Dimensional Beast info
+    2: { #All Bat info
+        "name":
+            "Bat",
+        "hp":
+            20,
+        "maxhp":
+            20,
+        "mp":
+            0,
+        "maxmp":
+            0,
+        "atk":
+            6,
+        "def":
+            1,
+        "magic":
+            4,
+        "spells":
+            ["Split"],
+        "xp_given":
+            6,
+        "gold_given":
+            7,
+        "ascii":
+            load_ascii("ascii/bat.txt")
+    },
+    3: { #All Heal Slime info
+        "name":
+            "Heal Slime",
+        "hp":
+            15,
+        "maxhp":
+            15,
+        "mp":
+            0,
+        "maxmp":
+            0,
+        "atk":
+            4,
+        "def":
+            2,
+        "magic":
+            5,
+        "spells":
+            ["Heal"],
+        "xp_given":
+            7,
+        "gold_given":
+            9,
+        "ascii":
+            load_ascii("ascii/heal_slime.txt")
+    },
+    4: { #All Dimensional Beast info
         "name":
             "Dimensional Beast",
         "hp":
@@ -1539,31 +1644,31 @@ enemies = { #All enemy info
         "ascii":
             load_ascii("ascii/d_beast.txt")
     },
-    3: { #All Bat info
+    5: { #All Shopkeeper info
         "name":
-            "Bat",
+            "Shopkeeper",
         "hp":
-            20,
+            999,
         "maxhp":
-            20,
+            999,
         "mp":
-            10,
+            999,
         "maxmp":
-            10,
+            999,
         "atk":
-            4,
+            999,
         "def":
-            0,
+            200,
         "magic":
-            4,
+            200,
         "spells":
-            ["Split"],
+            [],
         "xp_given":
-            1,
+            0,
         "gold_given":
-            1,
+            5000,
         "ascii":
-            load_ascii("ascii/bat.txt")
+            load_ascii("ascii/shopkeeper.txt")
     },
     "enemy": { #All active enemy info
         "name":
@@ -1614,7 +1719,7 @@ spells = { #All Spell info
     },
     "Heal+1": { #All Heal+1 info
         "cost":
-            15,
+            6,
         "type":
             "Heal",
         "multiplier":
@@ -1622,7 +1727,7 @@ spells = { #All Spell info
     },
     "Heal+2": { #All Heal+1 info
         "cost":
-            15,
+            8,
         "type":
             "Heal",
         "multiplier":
@@ -1638,7 +1743,7 @@ spells = { #All Spell info
     },
     "Heal+4": { #All Heal+1 info
         "cost":
-            15,
+            30,
         "type":
             "Heal",
         "multiplier":
@@ -1646,7 +1751,7 @@ spells = { #All Spell info
     },
     "Heal+5": { #All Heal+1 info
         "cost":
-            15,
+            50,
         "type":
             "Heal",
         "multiplier":
@@ -1654,11 +1759,19 @@ spells = { #All Spell info
     },
     "Fireball": { #All Fireball info
         "cost":
-            5,
+            6,
         "type":
             "Damage",
         "multiplier":
             3
+    },
+    "Dimensional Shriek": { #All Dimensional Shriek info
+        "cost":
+            0,
+        "type":
+            "Damage",
+        "multiplier":
+            5
     },
     "Split": { #All Drain info
         "cost":
@@ -1737,7 +1850,7 @@ items = { #All Item info
         "type":
             "Other",
         "info":
-            "Leader's Key: Opens locked doors.",
+            "Leader's Key: Opens locked doors in Dungeon 1.",
         "sell":
             0
     }
@@ -1757,8 +1870,8 @@ run = False
 enemy_choice = 0
 e_num = 0
 idx = 0
-charge_player = False
-charge_enemy = False
+steal_player = 0
+stolen = False
 
 current_map = "o_1"
 game_map = MAPS[current_map]
