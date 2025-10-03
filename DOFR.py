@@ -271,6 +271,8 @@ def interact_at(game_map, r,c, messages, steal_player):
 ¦ 2: [Green Tea] [8G]
 ¦ 3: [Bomb] [20G]
 ¦ 4: [Escape Orb] [15G]
+¦ 5: [Stone Sword] [100G] [{player["other"]["weapon_atk"]} --> 3]
+¦ 6: [Rubble Shied] [50G] [{player["other"]["shield_def"]} --> 2]
 ¦
 ¦ SELL: Sell items you have for GOLD
 ¦ STEAL: Steal an item
@@ -338,6 +340,28 @@ Press enter to go back.""")
                                 print_slow("\nYou don't have any space.")
                                 time.sleep(1)
                                 continue
+                        else:
+                            print_slow("\nYou don't have enough GOLD.")
+                            time.sleep(1)
+                            continue
+                    elif choice_shop == "5":
+                        if player["other"]["gold"] >= 100:
+                            print_slow("\nYou bought Stone Sword!")
+                            player["other"]["weapon"] = "Stone Sword"
+                            player["other"]["weapon_atk"] = 3
+                            player["other"]["gold"] -= 100
+                            time.sleep(1)
+                        else:
+                            print_slow("\nYou don't have enough GOLD.")
+                            time.sleep(1)
+                            continue
+                    elif choice_shop == "6":
+                        if player["other"]["gold"] >= 50:
+                            print_slow("\nYou bought Rubble Shield!")
+                            player["other"]["shield"] = "Rubble Shield"
+                            player["other"]["shield_def"] = 2
+                            player["other"]["gold"] -= 50
+                            time.sleep(1)
                         else:
                             print_slow("\nYou don't have enough GOLD.")
                             time.sleep(1)
@@ -625,6 +649,11 @@ def overworld():
 HP: {player["other"]["hp_bar"]} {player["rogue"]["hp"]} / {player["rogue"]["maxhp"]}
 MP: {player["other"]["mp_stars"]} {player["rogue"]["mp"]} / {player["rogue"]["maxmp"]}
 ATK: {player["rogue"]["atk"]} DEF: {player["rogue"]["def"]} MAGIC: {player["rogue"]["magic"]}
+
+WEAPON: {player["other"]["weapon"]} [+{player["other"]["weapon_atk"]}]
+SHIELD: {player["other"]["shield"]} [+{player["other"]["shield_def"]}]
+ACC: {player["other"]["acc"]} [+{player["other"]["acc_def"]}]
+
 XP: {player["other"]["xp"]}
 XP needed for next LV: {player["other"]["next_lv"]}
 GOLD: {player["other"]["gold"]}G
@@ -1066,6 +1095,9 @@ def level_system(player, level_stats): #The entire levelling system for all leve
         elif player["other"]["lv"] == 6:
             print_slow(f"\n\n{player["rogue"]["name"]} learnt Heal+1!")
             player["rogue"]["spells"][0] = "Heal+1"
+        elif player["other"]["lv"] == 8:
+            print_slow(f"\n\n{player["rogue"]["name"]} learnt Split!")
+            player["rogue"]["spells"][2] = "Split"
 
 def hp_bar(player): #HP bar generation
     max_bars = 20
@@ -1147,9 +1179,9 @@ def battle(player, enemies, damage_player, damage_enemy, heal_hp_player, heal_hp
                 if random.randint(1,100) > 5:
                     if random.randint(1,100) <= 15:
                         print_slow(" CRITICAL HIT!!")
-                        damage_enemy = (player["rogue"]["atk"] - (enemies["enemy"]["def"]/2)) * 1.5
+                        damage_enemy = ((player["rogue"]["atk"] + player["other"]["weapon_atk"]) - (enemies["enemy"]["def"]/2)) * 1.5
                     else:
-                        damage_enemy = player["rogue"]["atk"] - (enemies["enemy"]["def"]/2)
+                        damage_enemy = (player["rogue"]["atk"] + player["other"]["weapon_atk"]) - (enemies["enemy"]["def"]/2)
                     if damage_enemy % 1 == 0:
                         damage_enemy = int(damage_enemy)
                     else:
@@ -1369,9 +1401,9 @@ Press enter to go back.""")
                 if random.randint(1,100) > 5:
                     if random.randint(1,100) <= 15:
                         print_slow(" CRITICAL HIT!!")
-                        damage_player = (enemies["enemy"]["atk"] - (player["rogue"]["def"]/2)) * 1.5
+                        damage_player = (enemies["enemy"]["atk"] - ((player["rogue"]["def"]+player["other"]["shield_def"]+player["other"]["acc_def"])/2)) * 1.5
                     else:
-                        damage_player = enemies["enemy"]["atk"] - (player["rogue"]["def"]/2)
+                        damage_player = enemies["enemy"]["atk"] - ((player["rogue"]["def"]+player["other"]["shield_def"]+player["other"]["acc_def"])/2)
                     if damage_player % 1 == 0:
                         damage_player = int(damage_player)
                     else:
@@ -1409,7 +1441,7 @@ Press enter to go back.""")
                     print_frame_2()
                     print_frame()
                     print_slow(f"{enemies["enemy"]["name"]} casted {enemies["enemy"]["spells"][idx]}!")
-                    enemy_animation(heal_hp_player, damage_player)
+                    enemy_animation(heal_hp_enemy, damage_enemy)
                     if enemies["enemy"]["hp"] == enemies["enemy"]["maxhp"]:
                         print_slow(f"\nRecovered All HP.")
                     else:
@@ -1502,21 +1534,13 @@ player = { #All Player info
             "Rusty Sword",
         "shield":
             "Wooden Board",
-        "acc_1":
-            "None",
-        "acc_2":
-            "None",
-        "acc_3":
+        "acc":
             "None",
         "weapon_atk":
             1,
         "shield_def":
             1,
-        "acc_1_def":
-            0,
-        "acc_2_def":
-            0,
-        "acc_3_def":
+        "acc_def":
             0,
         "hp_bar":
             " ",
@@ -1529,7 +1553,7 @@ player = { #All Player info
         "next_lv":
             5,
         "gold":
-            0,
+            100,
         "inv":
             ["---","---","---","---","---","---","---","---"],
         "key_inv":
